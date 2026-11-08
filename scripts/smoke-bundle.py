@@ -37,13 +37,20 @@ with tempfile.TemporaryDirectory(prefix='lazycrawler-moved-') as temp:
             assert client.get('/api/settings').status_code==401
             client.post('/api/login',json={'token':(data/'admin-token').read_text().strip()}).raise_for_status()
             config=client.get('/api/settings').json()
+            admin=client.get('/api/admin').json()
+            assert admin['origin']=='demo' and len(admin['characters'])==4
+            assert len(admin['coverage'])>50
+            plan=client.get('/api/addon/plan').json()
+            assert plan['origin']=='live' and plan['opportunities']==[]
+            addon=root/'renamed application'/'_internal'/'addon'/'LazyCrawler'/'Core.lua'
+            assert addon.is_file()
             assert config['region']=='us'
             response=client.get('/api/export')
             assert response.json()['schema_version']==1
             assert 'attachment' in response.headers['content-disposition']
             other=subprocess.run([str(root/'renamed application'/'lazycrawler-server'),'--port',str(port+1),'--data',str(data)],capture_output=True,text=True,timeout=10)
             assert other.returncode!=0 and 'already running' in other.stderr
-        print('PASS: moved bundle starts, serves assets, authenticates, exports and prevents duplicate workers')
+        print('PASS: moved bundle starts, serves assets, authenticates, separates demo/live data, includes the addon and prevents duplicate workers')
     finally:
         process.terminate()
         process.wait(timeout=10)

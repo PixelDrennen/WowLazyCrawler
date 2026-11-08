@@ -30,3 +30,11 @@ The Linux build environment has no Fedora Plasma session. Browser-based visual i
 | Privacy | No secrets in API payloads, screenshots, exports, Git or diagnostic summaries |
 
 Blizzard ingestion still requires the user's client credentials and a live authenticated endpoint test. CraftSim/Auctionator APIs and in-game addon compatibility have not been integrated or tested in this milestone.
+
+## 0.2.0 addon/control-plane validation
+
+The expanded suite runs actual addon Lua in a Lua 5.1 runtime with a mocked WoW API surface. It checks server-valid JSON exports, combat deferral, partial mailbox and COD semantics, bank snapshots surviving unavailable tabs, shared stock counted once, bound/unknown stock on other characters excluded, observed-recipe/decor/material capture, same-cluster/expired-route rejection, matching sale-money collection, page construction and pooled row reuse.
+
+Backend tests cover all-region catalog grouping and Gurubashi connections; characters determining owned markets; demo/live isolation through the outgoing bundle; per-source older/omitted observations; warbank identity/deduplication; unknown identity conservatism; snapshot version/time validation; time-weighted session rates and sample deduplication; safe Lua-string decoding including UTF-8 decimal byte escapes; installer/write rejection while WoW runs; stable export reading; obsolete realm settings ignored by scans; catalog schema-failure recovery; and preserving v1 settings during schema-v2 upgrade.
+
+`smoke-bundle.py` also checks the bundled catalog/admin view, demo/live separation and embedded addon source after relocating the executable. CI packages the addon ZIP beside RPM/AppImage and verifies RPM desktop/backend entries. The GUI renderer and real WoW protected API/layout behavior are **not** certified by these tests. No native feature-complete claim is made. Validate the workflow using low-value items before relying on posting or transfer actions.

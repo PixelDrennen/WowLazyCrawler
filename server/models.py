@@ -5,8 +5,14 @@ from pydantic import BaseModel, Field, ConfigDict, field_validator
 class Settings(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
     region: Literal['us', 'eu', 'kr', 'tw'] = 'us'
-    realms: list[str] = Field(default_factory=list, max_length=30)
-    selling_realms: list[str] = Field(default_factory=list, max_length=30)
+    realms: list[str] = Field(default_factory=list, max_length=2000)
+    selling_realms: list[str] = Field(default_factory=list, max_length=2000)
+    demo_mode: bool = True
+    coverage_mode: Literal['all_clusters'] = 'all_clusters'
+    wow_path: str = Field(default='', max_length=1000)
+    companion_enabled: bool = True
+    theme: Literal['grove','spectral','ember'] = 'grove'
+    scan_concurrency: int = Field(default=3, ge=1, le=6)
     budget_gold: float = Field(default=50000, ge=0, le=1e9)
     max_item_gold: float = Field(default=5000, ge=0, le=1e9)
     min_profit_gold: float = Field(default=500, ge=0, le=1e9)

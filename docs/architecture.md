@@ -1,66 +1,65 @@
-# Architecture and contracts
+# Addon-first architecture
 
-## Decisions
+## Product boundary
 
-- **FastAPI + SQLite WAL:** one lightweight process, transaction-scoped connections and a single worker; portable personal deployment. SQLite has an online backup API and no daemon configuration. PostgreSQL/Redis remain a future option for multi-user/all-region workloads. Do not run multiple uvicorn workers.
-- **React + TypeScript + Vite:** local assets, original reusable components, Lucide icons. No runtime CDN or network font dependency. A restrained green/cyan dark palette, rounded panels, accessible labels, keyboard Escape dismissal, responsive columns and reduced-motion support form the initial design system.
-- **Electron:** isolated sandboxed renderer with Node integration off. Main process owns backend lifecycle, authenticates using a private token, installs an HTTP-only session cookie, prevents cross-origin navigation, and allows only specific HTTPS documentation destinations to open externally. No renderer filesystem bridge or unrestricted IPC.
-- **Bundled backend:** PyInstaller onedir includes Python dependencies and web assets. electron-builder includes that tree as resources and emits RPM/AppImage. Data lives in a stable XDG directory; it is never written into the installed app.
-- **Worker:** async scheduler checks every 15 seconds; one non-overlapping ingestion task, serial feeds, retry/backoff, HTTP ETag/Last-Modified validators, transactional snapshot replacement and historical deduplication. Cancelled jobs are recovered as interrupted on startup. A process file lock guards each data folder.
+The player experience lives in the WoW addon. The server discovers regional markets, stores observations, evaluates opportunities and produces compact planning data. Electron is the administration/control surface, with read-only reviews of characters, opportunities, crafting and workflow progress.
 
-## Schema v1
+No realm-selection or manual inventory/crafting entry is needed in the dashboard. It configures server policies and connection settings, not the player's moment-to-moment buying, transferring, posting or crafting.
 
-| Table | Identity and purpose |
+## Region coverage
+
+The shipped catalog was extracted from TSM's public realm metadata on 2026-11-08: 246 US, 267 EU, 18 KR and 27 TW realms. Region scans group all realms by their auction-house identity and download one representative realm CSV per group. The public-page metadata parser is schema-checked, never executes JavaScript, refreshes daily, and retains the last known catalog if the page changes. It is not presented as a stable public TSM catalog API. The data source's URL and observation time remain visible.
+
+TSM auction-house IDs use a **negative namespace** in `realms.connected_id`, distinct from positive Blizzard connected-realm IDs. Blizzard's authenticated discovery is stored separately in `blizzard_realms`; TSM IDs are never sent to Blizzard endpoints. The scanner ignores obsolete v1 realm-selection fields. Unknown character realm names are not guessed into a cluster.
+
+Character observations determine covered clusters. Candidate routes compare owned clusters against other distinct clusters in both directions; at least one side must be owned. An uncovered source or destination is marked as requiring an alt. No same-cluster or regional-commodity arbitrage is generated. This is still a conservative candidate model, not a portfolio allocation solver or exact-variant execution guarantee.
+
+## Storage and financial observations
+
+Schema v2 preserves all v1 tables and adds:
+
+| Table | Purpose |
 | --- | --- |
-| migrations | Numbered schema versions and application times |
-| settings | JSON configuration values; no Blizzard secrets |
-| sources | Source ID, HTTP validators, latest attempt/success, status, row count and sanitized errors |
-| observations | Current `(region,scope,realm,item_key,source)`; copper prices, optional demand, quantity, upstream/fetch timestamps |
-| history | Unique source observation by region, scope, realm, item identity and upstream time; indexed item/time |
-| realms | Dynamic region/slug → connected-realm ID mapping |
-| jobs | Latest 100 ingestion jobs, timestamps, state and error summaries |
-| recipes | Validated version-1 manual recipe plan JSON |
-| metadata | Reserved transfer-eligibility facts; no automatic assumptions or UI editor yet |
-| sessions | SHA-256 hashes of 24-hour session credentials |
+| characters | Addon account/character identity, region, realm, class, professions and last synchronization |
+| captures | Timestamped `(owner,scope)` snapshots; items, money, completeness and explanatory notes |
+| addon_recipes | Known recipe observations and available simulations by character |
+| addon_tasks | In-game workflow state by account and task |
+| lumber_samples | Deduplicated, attributed session quantities and durations |
+| sync_events | Recent transport/capture activity |
+| telemetry | Ingestion counters over time |
+| blizzard_realms | Separate authoritative endpoint identifiers for Blizzard calls |
 
-Scopes: `realm`, `commodity`, `region`. TSM item IDs are base IDs and cannot safely resolve gear variants. Blizzard non-commodity identity preserves the complete item object including modifiers, bonuses and battle-pet fields. Pet species CSV ingestion is deferred; pets from base item feeds must not be treated as species-level trading evidence. The initial candidate engine uses only TSM base-item observations; Blizzard auctions are collected independently for later exact-identity analysis. This prevents unsafe joins between base IDs and distinct variants.
+Capture scopes include bags/wallet, character bank, reagent storage, mailbox, auctions, equipped items, viewed guild bank and shared warbank. An omitted source preserves its last observation; an older capture cannot replace a newer one. Unknown data is distinct from an observed empty container. Guild assets are outside the personal balance. Mail money is receivable, not spendable wallet gold. COD attachments are not usable stock.
 
-Money is stored in copper, not floating-point gold. User inputs and crafting estimates use gold and are explicitly labeled estimates. Unknown metrics remain null. Source replacement and history inserts are one transaction, so malformed/changed upstream files leave the previous snapshot intact.
+Warbank uses a Battle.net-derived group identifier when available, once across characters/accounts in that group. If an account identity cannot be established, one conservative unresolved-region group is retained rather than summing potentially duplicate banks. The dashboard reports that unresolved group; this is not a claim to have identified unrelated accounts.
 
-Retention removes historical rows older than configured days after each scan; current snapshots persist and are filtered for staleness. Source records from disabled feeds remain visible for diagnostics but cannot supply active calculations. Changing region filters the analysis immediately.
+## Transport and safety
 
-## API v1
+The addon writes a versioned JSON string inside its own SavedVariables. A reload/logout is the disk-save boundary. The companion waits for stable files, parses **only the escaped JSON string**, validates schema/size/time bounds and never evaluates Lua.
 
-The same-origin dashboard is served at `/`. APIs are under `/api`; management routes require an HTTP-only, SameSite=strict cookie. Mutations reject a different Origin, login is limited to 10 attempts/IP/minute, secrets are never returned. There is no default public management binding. `/openapi.json` is the generated shape reference; authenticated `/api/contract` provides the same schema from within the workspace.
+Outgoing plans use a separate `LazyCrawler_Data` addon. A real-only planning provider feeds it regardless of the dashboard's demo setting. The companion checks the local WoW process state before preparing and immediately before atomically replacing `Data.lua`. Running or uncertain process state defers writes. SavedVariables are never modified by the server.
 
-| Endpoint | Method | Contract |
+The desktop's folder-picker IPC exposes one narrow operation, verifies the calling window's origin and retains sandbox/context isolation. Install/update rejects running WoW and unsafe symlinked targets, backs up the previous addon folder, and leaves user SavedVariables intact. The companion's file path setting is explicit; it does not search arbitrary personal directories.
+
+There remains a small inherent process-start race around any file replacement. Users should keep the client closed while installing/updating; native in-game and process detection validation is required. The implementation does not claim an OS-level launch lock with Battle.net.
+
+## Read models and API additions
+
+All `/api/` management endpoints except health/login retain session authentication and same-origin mutation checks.
+
+| Endpoint | Method | Behavior |
 | --- | --- | --- |
-| health | GET | Public status/version/database liveness |
-| login / logout | POST | Local token → session cookie; session invalidation |
-| settings | GET, PUT | Validated complete config; PUT fills omitted defaults |
-| credentials | PUT | Replace Blizzard client credentials; blank values clear them |
-| status | GET | Service, memory/disk/database, feeds and jobs; no secrets |
-| scan | POST | 202 job scheduled; 409 overlap; 422 no source enabled |
-| tutorial/complete | POST | Persist walkthrough completion independently of Electron’s random loopback port |
-| realms | GET | Cached selected-region discovery catalogue |
-| opportunities | GET | Top 500 ranked estimates with assumptions, risks and oldest evidence timestamp |
-| history/{item_id} | GET | Latest 500 base-item observations for selected region |
-| recipes | GET | Stored recipe plans |
-| recipes/{id} | PUT, DELETE | Validated plan upsert/delete; request path and payload ID must match |
-| crafting | GET | Manual recipe estimates and missing-material plans |
-| export | GET | Download schema_version=1 planning JSON; not an addon payload |
-| backup | GET | Consistent SQLite attachment, excluding session rows |
+| admin | GET | Demo/live review envelope, plus always-live service and companion diagnostics |
+| addon/snapshot | POST | Validated schema-v2 observation import |
+| addon/plan | GET | Always-real schema-v2 bundle; never demonstration records |
+| companion | GET | Actual process, watcher, sync and pending-write status |
+| companion/install | POST | Install/update first-party addon files with WoW closed |
+| settings | GET/PUT | Region service, policy, demo mode, theme and companion configuration |
 
-Validation models in `server/models.py` define accepted bounds, field types and defaults. Region changes do not delete history. Recipe materials require unique quality-specific item IDs and explicit quantities. Each recipe independently deducts its owned quantities; **do not reuse the same inventory ownership across multiple plans**. Shared inventory allocation is deferred until authoritative addon snapshots exist.
+Legacy recipe and inspection-export endpoints remain for v1 compatibility; the new UI does not use them for player workflow creation. `addon/plan` is the transport contract. Demo records are computed for presentation and never written into market, character or recipe tables. Health/job/file diagnostics remain real even while demo mode is enabled.
 
-## Initial analysis
+## Dependencies and access seams
 
-Entry: observed TSM realm minimum buyout. Exit: 90% of the lowest positive destination buyout/market/history and regional market/history/average-sale value. Net subtracts entry, configured auction cut and a configurable deposit reserve. Require fresh realm evidence and separately fresh daily regional context, minimum sold/day, inverse regional-demand cap, ROI, budget and per-item limits. Exclude known same-connected-realm pairs. Rank by net × min(regional sold/day,1) ÷ (1 + risk count).
+FastAPI, SQLite WAL, React/TypeScript and Electron remain. One bounded async scanner runs at a time; concurrent feed downloads are configurable (1–6), with HTTP validators and retries. Electron bundles the Python backend, web assets, catalog and addon payload; program installation and user data remain separate.
 
-This is a heuristic, not a calibrated sale probability, time-to-sale model, actionable order or portfolio allocation. Every transfer remains unverified until an authoritative in-game capability check. No purchase queue implies quantities can be bought from a snapshot. Candidate rankings do not jointly enforce a total portfolio budget.
-
-Crafting cost values all materials including owned stock. Cash required uses missing quantities. Estimated yield, sell price and concentration come from an explicit user simulation; no expansion mechanics are invented. Incremental profit per concentration requires a baseline **total profit for the entire plan**, not baseline per craft. Missing/zero reagent prices suppress profit rather than assuming free ingredients. Non-commodity reagent prices must be entered manually until realm-specific material lookup is added.
-
-## Future addon/companion boundary
-
-Server remains the analysis source of truth. A versioned companion exchanges bounded, validated inventory/simulation snapshots and recommendation bundles. A WoW addon cannot make arbitrary HTTP calls. No live SavedVariables rewriting, filesystem injection, or unattended purchases/posting will be implemented. Prefer explicit user import for initial transport, then an offline-safe companion with atomic writes, WoW process checks, checksums and schema migrations. CraftSim integrations must use documented APIs at a tested version; unsupported fields are unavailable, not inferred.
+All local features are enabled. `DataAccessProvider` is an interface for a future authenticated external data provider; it is **not** a billing system or a secure client-side paywall. No premium addon switches or payment integration are enabled. Any future commercial plan requires review of Blizzard's addon/API policies and data licensing; charging for addon-related data is not assumed permissible merely because a server supplies it.

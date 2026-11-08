@@ -47,6 +47,7 @@ def init():
             sale_price INTEGER, sale_rate REAL, sold_day REAL, quantity INTEGER,
             observed_at TEXT NOT NULL, fetched_at TEXT NOT NULL, source TEXT NOT NULL,
             PRIMARY KEY(region,scope,realm,item_key,source));
+        CREATE INDEX IF NOT EXISTS observation_item ON observations(region,scope,item_key);
         CREATE TABLE IF NOT EXISTS history(
             region TEXT NOT NULL, scope TEXT NOT NULL, realm TEXT NOT NULL, item_key TEXT NOT NULL,
             observed_at TEXT NOT NULL, buyout INTEGER NOT NULL, market INTEGER NOT NULL, source TEXT NOT NULL,
@@ -61,6 +62,21 @@ def init():
         CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, expires REAL NOT NULL);
         ''')
         db.execute('INSERT OR IGNORE INTO migrations VALUES(1,?)', (now(),))
+        db.executescript("""
+        CREATE TABLE IF NOT EXISTS characters(id TEXT PRIMARY KEY,account_id TEXT NOT NULL,name TEXT NOT NULL,
+            realm TEXT NOT NULL,region TEXT NOT NULL,class_name TEXT NOT NULL,level INTEGER NOT NULL,
+            professions TEXT NOT NULL,last_sync TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS captures(owner TEXT NOT NULL,scope TEXT NOT NULL,observed_at INTEGER NOT NULL,
+            payload TEXT NOT NULL,PRIMARY KEY(owner,scope));
+        CREATE TABLE IF NOT EXISTS addon_materials(owner TEXT PRIMARY KEY,payload TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS addon_recipes(owner TEXT PRIMARY KEY,payload TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS lumber_samples(id TEXT PRIMARY KEY,account_id TEXT NOT NULL,at TEXT NOT NULL,payload TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS addon_tasks(account_id TEXT NOT NULL,id TEXT NOT NULL,at TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(account_id,id));
+        CREATE TABLE IF NOT EXISTS sync_events(id INTEGER PRIMARY KEY,at TEXT NOT NULL,account_id TEXT NOT NULL,kind TEXT NOT NULL,message TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS blizzard_realms(region TEXT NOT NULL,slug TEXT NOT NULL,name TEXT NOT NULL,connected_id INTEGER NOT NULL,PRIMARY KEY(region,slug));
+        CREATE TABLE IF NOT EXISTS telemetry(at TEXT PRIMARY KEY,payload TEXT NOT NULL);
+        """)
+        db.execute('INSERT OR IGNORE INTO migrations VALUES(2,?)',(now(),))
         # Recover jobs interrupted by process exit; no job is silently left running.
         db.execute("UPDATE jobs SET status='interrupted',finished=?,message='Process stopped during scan; run again.' WHERE status='running'", (now(),))
 

@@ -1,43 +1,36 @@
-# Roadmap and acceptance criteria
+# Addon-first roadmap
 
-## Milestone 1: local server and desktop management (this branch)
+## Completed in the current administrative overhaul
 
-Deliver a runnable backend and Electron dashboard, TSM ingestion, optional Blizzard adapter, persistent settings and observations, manual crafting estimates, conservative trade candidates, backup/export and installable Linux packaging.
+- Preserve the Fedora desktop package identity, user-data directory and existing data.
+- Replace player-workflow forms with administration and read-only observations.
+- Discover all supported realms and scan one representative per auction cluster.
+- Infer owned markets from character snapshots, excluding connected-realm self-comparisons.
+- Add distinct money/container captures, including mailboxes and their completeness.
+- Separate requested synthetic demonstration data from all live storage and transport.
+- Add character/storage, coverage, health charts, décor/lumber review, provider settings and companion diagnostics.
+- Implement a real Retail addon and offline-safe companion against schema-v2 contracts.
 
-Acceptance: authenticated configuration; source failure preserves previous data; duplicate scans are blocked; commodities never cross realm boundaries; stale observations excluded; unknown demand not fabricated; owned stock has a cost; backup is consistent; bundled backend serves assets from a moved installation path. Fedora RPM/Wayland/desktop checks are recorded separately from host automation.
+## Native validation and complete auction workflow
 
-## Milestone 2: addon and safe transport
+Exercise actual Retail client APIs, TOC versions, bank tabs, inbox pages, auction updates, UI scaling and addon conflicts. Complete exact-variant acquisition and transferability evidence before allowing a custom purchase surface. Verify posting/deposit/confirmation and matching-sale collection in game. Add explicit workflow recovery for expired/failed auctions, returns, interrupted transfers and invalidated listings.
 
-- Modular Lua foundation, reusable UI, lifecycle and SavedVariables migrations.
-- Versioned manual import/export transport before automatic file sync.
-- Linux companion with atomic writes, explicit WoW-closed detection, interrupted-sync recovery and diagnostics.
-- Authoritative inventory/binding and transfer-eligibility evidence.
+Acceptance: an actual source purchase → warbank transfer → destination posting → matching mailbox collection completes without false transitions, hidden stock, budget overruns or taint errors. Same-cluster trades remain impossible.
 
-Acceptance: malformed/oversized/unsupported-version imports rejected without destroying state; inventory freshness and ownership explicit; no live SavedVariables overwrites; no prohibited automated gameplay.
+## Full crafting and housing production
 
-## Milestone 3: first-class crafting integration
+Verify the installed CraftSim and Auctionator APIs. Add quality-specific simulations, profession stats/gear/Knowledge/concentration observations and allocation; supported queue/list exchange; dependency DAGs and craft-versus-buy analysis; shared stock reservation; multi-character production plans; orders/recrafting; target restocks and actual-versus-estimated profit.
 
-- Verify installed CraftSim and Auctionator supported APIs and licenses; capability-detected adapters and graceful absence behavior.
-- Import character-specific recipes, quality, yield, equipment, concentration and simulations.
-- Consolidate material requirements across queues and deduct one shared inventory snapshot exactly once.
-- Produce an isolated Auctionator shopping list; preserve unrelated lists and internal quantities.
-- Dependency DAG with cycle detection, craft-versus-buy intermediate analysis and production budgets.
+Acceptance: a real housing décor plan identifies the appropriate crafter, exact materials and qualities, existing accessible stock, missing lumber, measured ETA, concentration opportunity cost and sale destination. No quality or formula is guessed when character data is missing.
 
-Acceptance: Hanami/Noraxei plans can be compared with CraftSim at matched inputs; missing character information disables unsupported estimates; output quality and reagents remain exact; shared inventory is not double counted.
+## Lumber adapters and economic intelligence
 
-## Milestone 4: executable market evidence and unified planning
+Verify the actual housing/lumber addon used on the user's machine. Implement a version-isolated adapter or a documented provider callback without copying proprietary code. Add localized item recognition, observed-session sample bounds, zone/route selection and confidence. Add calibrated sales/liquidity estimates, capital/realm/duplicate constraints, inventory aging and measured backtests before predictive claims.
 
-- Join exact item variants to authoritative metadata; special handling for battle-pet species/level/breed.
-- Current listing verification in game, shared AH cluster exclusion and quantity-aware acquisition costs.
-- Inventory-aware destination allocation, per-realm exposure, duplicate caps and a portfolio budget solver.
-- Compare crafting and buying the same exact output through the same fee/risk model.
+## Commercial extension
 
-Acceptance: the entire selected portfolio stays within available capital, stock and realm constraints; every action exposes source/time/uncertainty; no per-realm commodity arbitrage.
-
-## Milestone 5: analytics and polish
-
-Realized sales and inventory aging; concentration scheduling and Knowledge investment comparisons; optional alerts; backtesting/calibration; tutorial anchors and recovery; addon compatibility testing with TSM, Auctionator, Syndicator and bank interfaces. Add animations only within measured frame budgets. Predictive features must demonstrate value against deterministic baselines.
+Keep the addon usable and self-hosted features unlocked. Any future paid data/service proposal needs a separate Blizzard policy/data-license review and server-enforced authentication. Client-side flags are not entitlement security. Billing, a paid feature lock and a release stream are not enabled by this update.
 
 ## Workflow
 
-Use `feature/*` for new features, `fix/*` for bugs and `patch/*` for maintenance. Open a PR, validate, merge into `main`. CI uploads development installers only; releases and automatic updating require a later deliberate setup. Keep documentation describing the final behavior rather than abandoned designs.
+Use feature, fix and patch branches with tested PRs into main. Development installers and addon ZIPs are Actions artifacts. A native test checklist and feature-status matrix distinguish code implemented from behavior verified in game.

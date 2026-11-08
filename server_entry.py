@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port',type=int,default=8765)
     parser.add_argument('--host',default='127.0.0.1')
-    parser.add_argument('--data',default=os.environ.get('LAZYCRAWLER_DATA',str(Path.home()/'.local/share/wowlazycrawler')))
+    parser.add_argument('--data',default=os.environ.get('LAZYCRAWLER_DATA',str(Path(os.environ.get('XDG_DATA_HOME',str(Path.home()/'.local/share')))/'wowlazycrawler')))
     args = parser.parse_args()
     os.environ['LAZYCRAWLER_DATA'] = args.data
     data_path=Path(args.data).expanduser().resolve()
