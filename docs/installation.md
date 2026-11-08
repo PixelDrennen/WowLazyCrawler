@@ -74,3 +74,9 @@ Open **Addon connection**, choose the `_retail_` folder (or the parent World of 
 Enable `LazyCrawler` and `LazyCrawler Data` in the character-screen addon list and run `/lc`. The standalone `LazyCrawler-addon.zip` is included beside desktop installers if manual installation is preferred. Bank/mail/profession observations happen in game; a reload/logout flushes the export. The companion atomically publishes the separate data file while playing. Wait for bundle publication, then /reload to load it. If the first reload just exported new captures, allow about 20 seconds for import/publication, then reload again.
 
 All views show actual connected data; no demonstration characters, graphs or prices are substituted. Capture completeness and age remain visible, including unopened mailboxes and banks. The addon is an early client-validation build; run the native tests before relying on purchases, bank movement or posting with valuable items.
+
+## 0.4.0 automatic update path
+
+Install the updater-enabled desktop RPM/AppImage once. Subsequent stable main releases are published through the verified release job, downloaded by electron-updater, and installed on desktop-app quit/restart (RPM may require a normal polkit administrator prompt). Both addon folders update automatically in the configured Retail folder while WoW is running; `/reload` applies code. No full game restart is needed. Two-folder installation stages complete source trees and rolls back both on partial failure.
+
+Data transfer does not require a reload: desktop **Copy live market data** → WoW `/lc import` → paste and Apply. For immediate outbound inventories, WoW `/lc export` → Ctrl+C → desktop **Import copied character capture**. Clipboard access only occurs through explicit player actions. Imported JSON is bounded and parsed as data, never executed. Imported bundles persist in addon SavedVariables when the client normally saves.

@@ -58,7 +58,7 @@ async def lifespan(app):
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-app = FastAPI(title='WowLazyCrawler', version='0.3.1', lifespan=lifespan, docs_url=None, redoc_url=None)
+app = FastAPI(title='WowLazyCrawler', version='0.4.0', lifespan=lifespan, docs_url=None, redoc_url=None)
 
 
 @app.middleware('http')
@@ -87,7 +87,7 @@ async def security(request: Request, call_next):
 def health():
     with db.connect() as conn:
         conn.execute('SELECT 1')
-    return {'status':'ok','version':'0.3.1'}
+    return {'status':'ok','version':'0.4.0'}
 
 
 @app.post('/api/login')
@@ -147,7 +147,7 @@ def status():
         for line in Path('/proc/self/status').read_text().splitlines():
             if line.startswith('VmRSS:'):
                 memory = int(line.split()[1])*1024
-    return dict(version='0.3.1',database='connected',schema=version,observations=count,
+    return dict(version='0.4.0',database='connected',schema=version,observations=count,
                 data_bytes=files,disk_free=disk.free,memory_bytes=memory,uptime_seconds=int(time.time()-STARTED),
                 worker='scanning' if scanner.task and not scanner.task.done() else 'idle',
                 tutorial_complete=db.get('tutorial_complete',False),next_scan=scanner.next_scan,sources=db.rows('SELECT s.*, MIN(o.observed_at) AS observed_at FROM sources s LEFT JOIN observations o ON o.source=s.id GROUP BY s.id ORDER BY s.id'),

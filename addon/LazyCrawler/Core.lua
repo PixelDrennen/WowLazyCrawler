@@ -1,6 +1,6 @@
 local addonName, LC = ...
 _G.LazyCrawler = LC
-LC.version = "0.3.1"
+LC.version = "0.4.0"
 LC.events = {}
 LC.dirty = false
 LC.errors = {}
@@ -97,7 +97,7 @@ function LC:Export()
     if self.CheckpointSession then self:CheckpointSession() end
     if self.db.activity then tasks[#tasks+1]=self.db.activity end
     local payload={schema_version=2,account_id=self.db.accountID,addon_version=self.version,
-        loaded_bundle=self.data and self.data.generated_at,characters=self.db.characters,warbank=self.db.warbank,warbank_group=self.db.warbankGroup,lumber=self.db.lumber,
+        loaded_bundle=self.data and self.data.generated_at,loaded_transport=self.data and self.data.importedLive and "clipboard" or "file",characters=self.db.characters,warbank=self.db.warbank,warbank_group=self.db.warbankGroup,lumber=self.db.lumber,
         integrations=self:IntegrationStatus(),tasks=tasks}
     self.db.exportJSON=self:JSON(payload)
     self.db.exportedAt=time()
@@ -114,6 +114,7 @@ function LC:Initialize()
     local bnet=self:Call(BNGetInfo)
     if type(bnet)=='number' and bnet>0 then d.warbankGroup='bn:'..tostring(bnet) end
     self.data=type(LazyCrawlerData)=="table" and LazyCrawlerData.schema_version==2 and LazyCrawlerData.origin=="live" and LazyCrawlerData or {opportunities={},crafting={},catalog={}}
+    if type(d.importedBundle)=="table" and d.importedBundle.schema_version==2 and d.importedBundle.origin=="live" and (d.importedBundle.generated_epoch or 0)>(self.data.generated_epoch or 0) then self.data=d.importedBundle end
     if not d.settings.themeUserSet then d.settings.theme=self.data.theme or d.settings.theme or "grove" end
     self.activityTick=GetTime()
     self:Current()
@@ -138,6 +139,111 @@ SlashCmdList.LAZYCRAWLER=function(command)
     command=(command or ""):lower()
     if command=="capture" then LC:CaptureBags();LC:CaptureEquipped();LC:Changed();LC:Print("Accessible data captured. Reload or log out to flush the export.")
     elseif command=="gather" then if LC.session then LC:StopGathering() else LC:StartGathering() end
+    elseif command=="import" then LC:ShowUI();LC.page="data_import";LC:RefreshUI()
+    elseif command=="export" then LC:ShowUI();LC.page="data_export";LC:RefreshUI()
     elseif command=="help" then LC.db.settings.help=true;LC.db.tutorialStep=1;LC.db.tutorialReplay=true;LC:ShowUI()
     else LC:ShowUI() end
+end
+
+-- Bounded JSON decoding for explicit clipboard imports. Never evaluates Lua/code.
+function LC:DecodeDataJSON(text)
+    if type(text)~="string" or #text>4*1024*1024 then error("Import exceeds 4 MB") end
+    local position,nodes=1,0
+    local function skip() local _,last=text:find("^[ \t\r\n]*",position);position=(last or position-1)+1 end
+    local function utf8(code)
+        if code<128 then return string.char(code) end
+        if code<2048 then return string.char(192+math.floor(code/64),128+code%64) end
+        if code<65536 then return string.char(224+math.floor(code/4096),128+math.floor(code/64)%64,128+code%64) end
+        return string.char(240+math.floor(code/262144),128+math.floor(code/4096)%64,128+math.floor(code/64)%64,128+code%64)
+    end
+    local function stringValue()
+        position=position+1;local parts={};local start=position
+        while position<=#text do
+            local c=text:sub(position,position)
+            if c=='"' then parts[#parts+1]=text:sub(start,position-1);position=position+1;return table.concat(parts) end
+            if c=='\\' then
+                parts[#parts+1]=text:sub(start,position-1);position=position+1;c=text:sub(position,position)
+                local escaped={['"']='"',['\\']='\\',['/']='/',b='\b',f='\f',n='\n',r='\r',t='\t'}
+                if c=='u' then
+                    local hex=text:sub(position+1,position+4);if #hex~=4 or hex:find('[^%x]') then error("Invalid Unicode escape") end
+                    local code=tonumber(hex,16);position=position+4
+                    if code>=55296 and code<=56319 then
+                        if text:sub(position+1,position+2)~='\\u' then error("Missing Unicode surrogate") end
+                        local low=tonumber(text:sub(position+3,position+6),16)
+                        if not low or low<56320 or low>57343 then error("Invalid Unicode surrogate") end
+                        code=65536+(code-55296)*1024+low-56320;position=position+6
+                    elseif code>=56320 and code<=57343 then error("Invalid Unicode surrogate") end
+                    parts[#parts+1]=utf8(code)
+                elseif escaped[c] then parts[#parts+1]=escaped[c] else error("Invalid JSON escape") end
+                position=position+1;start=position
+            else if c:byte()<32 then error("Invalid string character") end;position=position+1 end
+        end
+        error("Truncated string")
+    end
+    local parse
+    parse=function(depth)
+        nodes=nodes+1;if depth>24 or nodes>250000 then error("Import is too complex") end
+        skip();local c=text:sub(position,position)
+        if c=='"' then return stringValue() end
+        if c=='{' or c=='[' then
+            local object=c=='{';local close=object and '}' or ']';local value={};local count=0
+            position=position+1;skip();if text:sub(position,position)==close then position=position+1;return value end
+            while true do
+                skip();local key
+                if object then if text:sub(position,position)~='"' then error("Expected object key") end;key=stringValue();skip();if text:sub(position,position)~=':' then error("Expected colon") end;position=position+1
+                else count=count+1;key=count end
+                value[key]=parse(depth+1);skip();c=text:sub(position,position);position=position+1
+                if c==close then return value end
+                if c~=',' then error("Expected separator") end
+            end
+        end
+        for _,entry in ipairs({{'true',true},{'false',false},{'null',nil}}) do
+            if text:sub(position,position+#entry[1]-1)==entry[1] then position=position+#entry[1];return entry[2] end
+        end
+        local token=text:sub(position):match('^-?%d+%.?%d*[eE]?[+-]?%d*')
+        local number=token and tonumber(token)
+        if not number or number~=number or number==math.huge or number==-math.huge or token:match('^-?0%d') or token:match('%.$') or token:match('%.[eE]') then error("Invalid JSON value") end
+        position=position+#token;return number
+    end
+    local value=parse(0);skip();if position<=#text then error("Unexpected trailing content") end
+    return value
+end
+function LC:ImportMarketData(text)
+    if InCombatLockdown() then self:Print("Import data outside combat.");return false end
+    local ok,result=pcall(function()
+        if text:sub(1,4)~='LC1:' then error("Copy market data from the desktop app first") end
+        local data=self:DecodeDataJSON(text:sub(5))
+        if type(data)~='table' or data.schema_version~=2 or data.origin~='live' then error("Unsupported data bundle") end
+        local char=self:Current()
+        if data.region~=char.region then error("Bundle region does not match this character") end
+        if type(data.generated_epoch)~='number' or data.generated_epoch>time()+600 or type(data.generated_at)~='string' then error("Invalid generation time") end
+        if self.data.generated_epoch and data.generated_epoch<self.data.generated_epoch then error("This bundle is older than the loaded data") end
+        if type(data.catalog)~='table' or #data.catalog>1000 or type(data.opportunities)~='table' or #data.opportunities>500 then error("Invalid market lists") end
+        for _,candidate in ipairs(data.opportunities) do
+            for _,key in ipairs({'name','item_key','source_realm','destination_realm'}) do if type(candidate[key])~='string' then error("Invalid route identity") end end
+            for _,key in ipairs({'buyout','estimated_sale','net_profit','roi'}) do if type(candidate[key])~='number' then error("Invalid route price") end end
+            if candidate.expires_at and type(candidate.expires_at)~='number' then error("Invalid route expiry") end
+        end
+        for _,market in ipairs(data.catalog) do
+            if type(market)~='table' or type(market.realms)~='table' then error("Invalid realm catalog") end
+            for _,realm in ipairs(market.realms) do if type(realm)~='table' or type(realm.slug)~='string' or type(realm.name)~='string' then error("Invalid realm identity") end end
+        end
+        for _,key in ipairs({'crafting','crafting_discovery'}) do if data[key]~=nil and type(data[key])~='table' then error("Invalid crafting list") end end
+        if data.market_diagnostics~=nil then
+            local d=data.market_diagnostics;if type(d)~='table' then error("Invalid market diagnostics") end
+            for _,key in ipairs({'region','title','message','action'}) do if type(d[key])~='string' then error("Invalid diagnostic text") end end
+            for _,key in ipairs({'fresh_markets','total_markets','fresh_owned_markets','owned_markets','fresh_regional_rows'}) do if type(d[key])~='number' then error("Invalid diagnostic count") end end
+            if d.source_errors~=nil and type(d.source_errors)~='table' then error("Invalid source errors") end
+            for _,source in ipairs(d.source_errors or {}) do if type(source)~='table' or type(source.id)~='string' or type(source.error)~='string' then error("Invalid source issue") end end
+        end
+        for _,recipe in ipairs(data.crafting_discovery or {}) do
+            if type(recipe)~='table' or type(recipe.name)~='string' or type(recipe.profession)~='string' or type(recipe.materials)~='table' then error("Invalid recipe data") end
+            for _,material in ipairs(recipe.materials) do if type(material)~='table' or type(material.item_id)~='number' or type(material.quantity)~='number' then error("Invalid material data") end end
+        end
+        data.importedLive=true;self.data=data;self.db.importedBundle=data;self:Changed()
+        return true
+    end)
+    if not ok then self.lastImportError=tostring(result):gsub("^.-:%d+:%s*","");self:Print("Import failed: "..self.lastImportError);return false end
+    self.lastImportError=nil
+    self:Print("Market data applied immediately. No reload needed.");return result
 end

@@ -37,11 +37,11 @@ Warbank uses a Battle.net-derived group identifier when available, once across c
 
 The addon writes a versioned JSON string inside its own SavedVariables. A reload/logout is the disk-save boundary. The companion waits for stable files, parses **only the escaped JSON string**, validates schema/size/time bounds and never evaluates Lua.
 
-Outgoing plans use a separate `LazyCrawler_Data` addon. The companion atomically replaces only its generated `Data.lua`, even while WoW is running; the client loads it on its next reload/start. Executable addon installation still requires the client closed. SavedVariables are never modified by the server. Dashboard and transport both use real observations, regardless of a legacy demo setting.
+Outgoing plans use a separate `LazyCrawler_Data` addon. The companion atomically replaces only its generated `Data.lua`, even while WoW is running; the client loads it on its next reload/start. Addon code installation uses staged folder replacement while the game is open; new code takes effect on `/reload`. SavedVariables are never modified by the server. Dashboard and transport both use real observations, regardless of a legacy demo setting.
 
-The desktop's folder-picker IPC exposes one narrow operation, verifies the calling window's origin and retains sandbox/context isolation. Install/update rejects running WoW and unsafe symlinked targets, backs up the previous addon folder, and leaves user SavedVariables intact. The companion's file path setting is explicit; it does not search arbitrary personal directories.
+The desktop's folder-picker IPC exposes one narrow operation, verifies the calling window's origin and retains sandbox/context isolation. Install/update rejects unsafe symlinked targets, backs up the previous addon folder, and leaves user SavedVariables intact. The companion's file path setting is explicit; it does not search arbitrary personal directories.
 
-There remains a small inherent process-start race around any file replacement. Users should keep the client closed while installing/updating; native in-game and process detection validation is required. The implementation does not claim an OS-level launch lock with Battle.net.
+There remains a small inherent process-start race around any file replacement. The app reports completion before asking for a reload; native in-game validation is required. The implementation does not claim an OS-level launch lock with Battle.net.
 
 ## Read models and API additions
 
@@ -53,7 +53,11 @@ All `/api/` management endpoints except health/login retain session authenticati
 | addon/snapshot | POST | Validated schema-v2 observation import |
 | addon/plan | GET | Always-real schema-v2 bundle; never demonstration records |
 | companion | GET | Actual process, watcher, sync and pending-write status |
-| companion/install | POST | Install/update first-party addon files with WoW closed |
+| companion/install | POST | Install/update first-party addon files with staging and rollback |
 | settings | GET/PUT | Region service, policy, theme and companion configuration |
 
 Legacy recipe and inspection-export endpoints remain for v1 compatibility; the new UI does not use them for player workflow creation. `addon/plan` is the transport contract. Demo presentation has been removed. Missing inputs remain empty/unknown with diagnostics. Session state is saved in the addon and exported as a task record; elapsed play time is checkpointed and excludes offline gaps. Native auction-key scan results are session/realm bounded; a player acknowledgement covers the separate TSM review.
+
+Desktop updates use electron-updater's pinned GitHub provider, with separate native RPM/AppImage handlers and hash-verified release metadata. Only successful main builds publish stable release assets; the release is drafted until all artifacts are uploaded. The renderer gets fixed trusted-origin IPC actions, not shell access, arbitrary paths or update URLs.
+
+Live transfer uses a `LC1:` JSON market bundle and `LC_CAPTURE1:` capture. Clipboard reads/writes require explicit app actions. Lua decoding has size/depth/node limits, Unicode handling and contract checks, and never calls loadstring. The addon applies incoming data immediately and caches it separately from its SavedVariables capture export. It chooses a newer cached live bundle over older data-addon files on normal reload. The companion never writes SavedVariables.

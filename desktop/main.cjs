@@ -5,6 +5,7 @@ const {
   session,
   shell,
   ipcMain,
+  clipboard,
 } = require("electron");
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
@@ -71,7 +72,7 @@ async function start() {
       const result = await fetch(`http://127.0.0.1:${record.port}/api/health`, {
         signal: AbortSignal.timeout(1000),
       });
-      if (result.ok && (await result.json()).version === "0.3.1")
+      if (result.ok && (await result.json()).version === "0.4.0")
         existing = record;
     }
   } catch {}
@@ -133,7 +134,7 @@ async function start() {
   });
   if (!response.ok)
     throw new Error("Unable to authenticate with local backend.");
-  const cookie = response.headers
+  let cookie = response.headers
     .get("set-cookie")
     ?.match(/lc_session=([^;]+)/)?.[1];
   if (!cookie) throw new Error("Backend did not supply a session.");
@@ -183,10 +184,63 @@ async function start() {
   win.webContents.on("will-navigate", (event, target) => {
     if (new URL(target).origin !== url) event.preventDefault();
   });
+  const { createUpdateController } = require("./updates.cjs");
+  const updateLibrary = app.isPackaged ? require("electron-updater") : null;
+  const updater = updateLibrary ? (process.env.APPIMAGE ? new updateLibrary.AppImageUpdater() : updateLibrary.autoUpdater) : null;
+  async function backendRequest(route, options = {}) {
+      const read = () => fetch(url + "/api/" + route, { ...options, headers: { ...options.headers, Cookie: `lc_session=${cookie}` }, signal: AbortSignal.timeout(30000) });
+      let result = await read();
+      if (result.status === 401) {
+        const login = await fetch(url + "/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }), signal: AbortSignal.timeout(5000) });
+        const renewed = login.headers.get("set-cookie")?.match(/lc_session=([^;]+)/)?.[1];
+        if (login.ok && renewed) {
+          cookie = renewed;
+          await session.defaultSession.cookies.set({url, name:"lc_session", value:cookie, httpOnly:true, sameSite:"strict"});
+          result = await read();
+        }
+      }
+      if (!result.ok) throw new Error(`Local service request failed (${result.status})`);
+      return result.json();
+
+  }
+  const updates = createUpdateController({
+    updater, packaged: app.isPackaged, version: app.getVersion(),
+    readSettings: () => backendRequest("settings"),
+  });
+  const trusted = event => {
+    if (event.sender !== win.webContents || new URL(event.sender.getURL()).origin !== url) throw new Error("Untrusted window");
+  };
+  ipcMain.handle("lazycrawler:copy-market-data", async event => {
+    trusted(event);const plan = await backendRequest("addon/plan");
+    const text = "LC1:" + JSON.stringify(plan);
+    if (Buffer.byteLength(text, "utf8") > 4 * 1024 * 1024) throw new Error("Market bundle exceeds the 4 MB live import limit");
+    clipboard.writeText(text);return { generatedAt: plan.generated_at, candidates: plan.opportunities.length };
+  });
+  ipcMain.handle("lazycrawler:import-character-capture", async event => {
+    trusted(event);const text = clipboard.readText();
+    if (!text.startsWith("LC_CAPTURE1:") || Buffer.byteLength(text,"utf8") > 4 * 1024 * 1024 + 20) throw new Error("Copy a LazyCrawler character capture with /lc export first");
+    let capture;try { capture = JSON.parse(text.slice(12)); } catch { throw new Error("Clipboard capture is not valid JSON"); }
+    if (capture?.schema_version !== 2 || typeof capture.account_id !== "string" || !capture.characters) throw new Error("Clipboard does not contain a supported LazyCrawler capture");
+    return backendRequest("addon/snapshot", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(capture)});
+  });
+  ipcMain.handle("lazycrawler:update-status", event => { trusted(event); return updates.status(); });
+  ipcMain.handle("lazycrawler:check-updates", event => { trusted(event); return updates.check(true); });
+  ipcMain.handle("lazycrawler:update-preferences", event => { trusted(event); return updates.preferences(); });
+  ipcMain.handle("lazycrawler:install-update", event => { trusted(event); return updates.install(); });
   await win.loadURL(url);
+  const check = () => updates.check().catch(error => console.error("Update check:", error.message));
+  void check();
+  const updateTimer = setInterval(check, 60 * 60 * 1000);
+  updateTimer.unref();
 }
 app.on("window-all-closed", () => app.quit());
-app.on("before-quit", () => {
+app.on("before-quit", event => {
   exiting = true;
-  if (backend) backend.kill("SIGTERM");
+  if (!backend) return;
+  event.preventDefault();
+  const child = backend;backend = null;
+  let finished = false;
+  const done = () => { if (finished) return;finished = true;clearTimeout(timeout);app.quit(); };
+  const timeout = setTimeout(() => { child.kill("SIGKILL");done(); }, 8000);
+  child.once("exit", done);child.kill("SIGTERM");
 });

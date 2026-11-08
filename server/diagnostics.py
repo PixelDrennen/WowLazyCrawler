@@ -31,7 +31,7 @@ def market_readiness(config, candidate_count, scanning=False):
     if not config.tsm_enabled:
         diagnostics.update(state='pricing_disabled',title='Route pricing is disabled',message='Realm-flip estimates currently require the TSM price and regional-demand feeds. Blizzard snapshots alone do not provide that demand context.',action='Enable TSM public feeds in desktop Configuration, then run a region refresh.')
     elif not region_rows or not realm_rows:
-        diagnostics.update(state='prices_missing',title='Market prices are missing',message='Character captures and market prices are separate. Opening bags, banks and auctions does not download region-wide prices.',action='In the desktop Command center, run a region refresh. Review Server health if feeds fail; then load the published result with /reload.')
+        diagnostics.update(state='prices_missing',title='Market prices are missing',message='Character captures and market prices are separate. Opening bags, banks and auctions does not download region-wide prices.',action='In the desktop Command center, run a region refresh. Review Server health if feeds fail; then copy the latest market data into /lc import (no reload needed).')
     elif not fresh_context or len(fresh_markets)<2:
         diagnostics.update(state='prices_stale',title='Not enough fresh market data',message='Routes require fresh regional demand and prices from at least two distinct auction markets.',action='Run a region refresh in the desktop app and inspect source errors. Existing captures are preserved; stale prices do not become recommendations.')
     elif not owned:
@@ -41,5 +41,5 @@ def market_readiness(config, candidate_count, scanning=False):
     elif not candidate_count:
         diagnostics.update(state='no_matches',title='No qualifying routes',message='Fresh prices exist. No route involving your character markets passed the current price, demand, freshness, budget and profit filters.',action='Review the filters in desktop Configuration and feed coverage. Zero matches is a valid result; prices and profits are never invented.')
     if scanning:
-        diagnostics['action']='A region refresh is running. Watch its progress in desktop Server health; load the next published bundle when it completes.'
+        diagnostics['action']='A region refresh is running. Watch its progress in desktop Server health; copy the latest market data into /lc import when it completes.'
     return diagnostics

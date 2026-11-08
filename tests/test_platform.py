@@ -114,7 +114,7 @@ def test_savedvariables_decoder_never_executes_and_handles_utf8():
     with pytest.raises(ValueError):decode_saved_export('LazyCrawlerDB = os.execute("something")')
 
 
-def test_companion_publishes_data_for_reload_but_blocks_install_while_game_running(client,tmp_path):
+def test_companion_publishes_data_and_installs_while_game_running(client,tmp_path):
     root=tmp_path/'wow'/'_retail_';root.mkdir(parents=True);(root/'Wow.exe').touch()
     out=root/'Interface'/'AddOns'/'LazyCrawler_Data';out.mkdir(parents=True);target=out/'Data.lua';target.write_text('original')
     config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
@@ -122,8 +122,8 @@ def test_companion_publishes_data_for_reload_but_blocks_install_while_game_runni
     with patch('server.companion.game_state',return_value='running'):
         worker.tick()
         assert 'LazyCrawlerData = ' in target.read_text() and not worker.pending
-        assert '/reload' in worker.state
-        with pytest.raises(ValueError):install_addons(str(root))
+        assert worker.last_output
+        assert install_addons(str(root))['installed']
     with patch('server.companion.game_state',return_value='closed'):
         worker.tick()
         assert 'LazyCrawlerData = ' in target.read_text() and not worker.pending
@@ -277,3 +277,44 @@ def test_identical_bundle_not_republished_and_loaded_identity_acknowledged(clien
     target.write_text('manually replaced')
     db.put('config_revision','changed');worker.tick()
     assert 'LazyCrawlerData = ' in target.read_text()  # A changed/deleted file must be repaired despite identical semantic data.
+
+
+def test_addon_auto_update_installs_first_time_and_updates_running_client_without_touching_saves(client,tmp_path):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
+    worker=Companion();worker.plan_provider=lambda:dict(origin='live',schema_version=2,generated_at=db.now(),opportunities=[])
+    with patch('server.companion.game_state',return_value='running'):
+        worker.tick();assert '/reload' in worker.addon_update['state']
+        assert (root/'Interface'/'AddOns'/'LazyCrawler').exists()
+    with patch('server.companion.game_state',return_value='closed'):worker.tick()
+    target=root/'Interface'/'AddOns'/'LazyCrawler'/'UI.lua';expected=target.read_bytes();target.write_text('old version')
+    saved=root/'WTF'/'Account'/'a'/'SavedVariables';saved.mkdir(parents=True)
+    export=saved/'LazyCrawler.lua';export.write_text('LazyCrawlerDB = {["exportJSON"] = '+lua_literal(json.dumps(snapshot()))+'}')
+    before=export.read_bytes()
+    with patch('server.companion.game_state',return_value='running'):worker.tick()
+    assert target.read_bytes()==expected
+    assert (target.parent.parent/'LazyCrawler.previous'/'UI.lua').read_text()=='old version'
+    assert export.read_bytes()==before
+    assert '/reload' in worker.addon_update['state']
+
+
+def test_addon_update_rolls_back_both_directories_on_partial_failure(client,tmp_path,monkeypatch):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    with patch('server.companion.game_state',return_value='closed'):install_addons(str(root))
+    addons=root/'Interface'/'AddOns';first=addons/'LazyCrawler'/'Core.lua';second=addons/'LazyCrawler_Data'/'Data.lua'
+    first.write_text('first original');second.write_text('second original');original=Path.rename
+    def fail_second(path,target):
+        if path.name=='LazyCrawler_Data' and path.parent.name.startswith('.lazycrawler-install-'):raise OSError('simulated second-directory failure')
+        return original(path,target)
+    monkeypatch.setattr(Path,'rename',fail_second)
+    with patch('server.companion.game_state',return_value='running'):
+        with pytest.raises(OSError):install_addons(str(root))
+    assert first.read_text()=='first original' and second.read_text()=='second original'
+
+
+def test_automatic_addon_update_preference_is_respected(client,tmp_path):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    config=client.get('/api/settings').json();config.update(wow_path=str(root),auto_addon_updates=False);client.put('/api/settings',json=config).raise_for_status()
+    worker=Companion()
+    with patch('server.companion.game_state',return_value='closed'):worker.tick()
+    assert 'disabled' in worker.addon_update['state'] and not (root/'Interface').exists()

@@ -2,7 +2,7 @@
 
 The target is a feature-complete addon. This update realigns the product and begins actual addon implementation; it must not be labeled production-complete based solely on passing simulated tests.
 
-| Requirement | Implemented in 0.3.0 | Remaining gate |
+| Requirement | Implemented in 0.4.0 | Remaining gate |
 | --- | --- | --- |
 | Admin-only dashboard | Region service settings, health, coverage, character/storage review, read-only radar/crafting, graphs | Native visual QA at desktop sizes |
 | Automatic realm coverage | All supported-region realm metadata, one feed per AH cluster, own markets inferred from characters | Catalog-layout monitoring; live full-region scale profiling |
@@ -11,7 +11,7 @@ The target is a feature-complete addon. This update realigns the product and beg
 | Bank/warbank | Open-bank captures, shared identity, non-wiping unavailable tabs | Native tab and transfer tests |
 | Mailboxes | Item attachments, COD, receivable money, loaded/total completeness | Native inbox pagination, sale/return/COD cases |
 | Auctions/guild/equipped | Owned auctions, viewed guild bank and equipped capture | Native event timing and inventory semantics |
-| Safe companion | Stable export parsing; no Lua execution or SavedVariables writes; atomic data-addon publication for /reload | Native Wine/Proton process verification and migration tests |
+| Safe companion | Stable export parsing; no Lua execution or SavedVariables writes; atomic data-addon publication, immediate explicit clipboard import/export, automatic addon-file updates for /reload | Native Wine/Proton process verification and migration tests |
 | Guided arbitrage | Persistent timed multi-realm sessions, configurable stock/gold targets, exact-stack player-click moves, TSM handoff, auction-key undercut checks, sale collection | Complete custom purchase UI; exact variants; native protected-action/taint tests |
 | Crafting | Learned/unlearned recipe capture, available CraftSim profit observation, timed minimum-stock runs, price/demand-backed exploration with requirement detail | Full quality/gear/Knowledge/concentration optimization, order/recraft support, multi-character allocation |
 | Housing focus | Decor classification and focused crafting view | Complete production/restocking/dependency planning |

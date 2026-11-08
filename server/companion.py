@@ -14,6 +14,23 @@ from .snapshots import accept_snapshot
 
 ROOT=Path(__file__).resolve().parent.parent
 MAX_EXPORT=16*1024*1024
+ADDONS=('LazyCrawler','LazyCrawler_Data')
+
+def addon_update_status(configured):
+    root=retail_root(configured);dest=root/'Interface'/'AddOns'
+    versions={};needed=False
+    for name in ADDONS:
+        source=ROOT/'addon'/name;target=dest/name
+        toc=target/(name+'.toc')
+        match=re.search(r'^## Version:\s*(.+)$',toc.read_text() if toc.is_file() else '',re.M)
+        versions[name]=match[1].strip() if match else None
+        for item in source.rglob('*'):
+            if not item.is_file() or (name=='LazyCrawler_Data' and item.name=='Data.lua'):continue
+            installed=target/item.relative_to(source)
+            if not installed.is_file() or installed.is_symlink() or installed.read_bytes()!=item.read_bytes():needed=True
+        if not (target/'Data.lua').is_file() and name=='LazyCrawler_Data':needed=True
+    return dict(needed=needed,installed_versions=versions)
+
 
 
 def decode_saved_export(text):
@@ -91,37 +108,40 @@ def lua_literal(value,depth=0):
 
 
 def install_addons(configured):
-    if game_state()!='closed':raise ValueError('Close World of Warcraft before installing or updating addon files')
     root=retail_root(configured);dest=root/'Interface'/'AddOns'
     dest.mkdir(parents=True,exist_ok=True)
     if not dest.resolve().is_relative_to(root):raise ValueError('Addon path escapes installation')
-    for name in ['LazyCrawler','LazyCrawler_Data']:
-        source=ROOT/'addon'/name
-        target=dest/name
-        if target.is_symlink():raise ValueError('Cannot update a symlinked addon directory')
-        # Preserve a previous version for rollback; no game SavedVariables are touched.
-        if target.exists():
-            backup=dest/(name+'.previous')
-            if backup.is_symlink():raise ValueError('Unsafe backup directory')
-            if backup.exists():shutil.rmtree(backup)
-            target.rename(backup)
-        try:shutil.copytree(source,target)
+    for name in ADDONS:
+        for target in [dest/name,dest/(name+'.previous')]:
+            if target.is_symlink():raise ValueError('Cannot update a symlinked addon directory')
+    with tempfile.TemporaryDirectory(dir=dest,prefix='.lazycrawler-install-') as staging:
+        stage=Path(staging);moved=[];installed=[]
+        for name in ADDONS:shutil.copytree(ROOT/'addon'/name,stage/name)
+        try:
+            for name in ADDONS:
+                target=dest/name
+                if target.exists():target.rename(stage/(name+'.rollback'));moved.append(name)
+                (stage/name).rename(target);installed.append(name)
         except Exception:
-            backup=dest/(name+'.previous')
-            if backup.exists() and not target.exists():backup.rename(target)
+            for name in reversed(installed):shutil.rmtree(dest/name)
+            for name in moved:(stage/(name+'.rollback')).rename(dest/name)
             raise
+        for name in moved:
+            backup=dest/(name+'.previous')
+            if backup.exists():shutil.rmtree(backup)
+            (stage/(name+'.rollback')).rename(backup)
     return dict(installed=True,path=str(dest),notice='Enable both LazyCrawler addons on the Retail character screen')
 
 
 class Companion:
     def __init__(self):
         self.last_read={};self.stable={};self.state='not configured';self.error=None;self.pending=False;self.last_output=None;self.last_revision=None
-        self.plan_provider=None
+        self.plan_provider=None;self.addon_update=dict(state='not configured',error=None,installed_versions={})
 
     def status(self):
         published=db.get('companion_bundle',{})
         loaded=db.get('last_loaded_bundle')
-        return dict(state=self.state,error=self.error,pending=self.pending,last_output=self.last_output or published.get('published_at'),
+        return dict(addon_update=self.addon_update,state=self.state,error=self.error,pending=self.pending,last_output=self.last_output or published.get('published_at'),
             published_bundle=published.get('generated_at'),loaded_bundle=loaded,
             game_state=game_state(),last_sync=db.get('last_addon_sync'),protocol=2)
 
@@ -137,6 +157,22 @@ class Companion:
         if not config.wow_path:self.state='not configured';return
         root=retail_root(config.wow_path)
         self.state='watching exports';self.error=None
+        update=addon_update_status(config.wow_path)
+        running=db.get('last_addon_version')
+        expected=update['installed_versions'].get('LazyCrawler')
+        self.addon_update=dict(update,state='up to date' if running==expected else 'installed — /reload to apply addon code',error=None,running_version=running)
+        if update['needed']:
+            if not config.auto_addon_updates:self.addon_update['state']='available — automatic addon updates disabled'
+            else:
+                try:
+                    self.addon_update['state']='installing'
+                    install_addons(config.wow_path)
+                    self.last_revision=None
+                    self.addon_update=dict(addon_update_status(config.wow_path),state='installed — /reload to apply addon code',error=None)
+                except Exception as exc:
+                    self.addon_update.update(state='update failed — retrying',error=str(exc)[:300])
+                    raise
+
         for path in (root/'WTF'/'Account').glob('*/SavedVariables/LazyCrawler.lua'):
             if not path.resolve().is_relative_to(root):continue
             stat=path.stat()
@@ -156,7 +192,7 @@ class Companion:
         if revision==self.last_revision:
             published=db.get('companion_bundle',{})
             loaded=db.get('last_loaded_bundle',{})
-            if published.get('generated_at') and published.get('generated_at')!=loaded.get('generated_at'):self.state='bundle published — /reload to load'
+            if published.get('generated_at') and published.get('generated_at')>loaded.get('generated_at',''):self.state='new data ready — live import or normal reload'
             else:self.state='watching exports — bundle acknowledged' if loaded else 'watching exports'
             return
         self.pending=True
@@ -173,7 +209,7 @@ class Companion:
         if published.get('path')==str(target) and published.get('payload_digest')==digest and target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest()==published.get('file_digest'):
             self.last_revision=revision;self.pending=False;self.last_output=published.get('published_at')
             loaded=db.get('last_loaded_bundle',{})
-            self.state='watching exports — bundle acknowledged' if loaded.get('generated_at')==published.get('generated_at') else 'bundle published — /reload to load'
+            self.state='watching exports — bundle acknowledged' if loaded.get('generated_at','')>=published.get('generated_at','') else 'new data ready — live import or normal reload'
             return
         content='-- Generated atomically by LazyCrawler. No gameplay code.\nLazyCrawlerData = '+lua_literal(payload)+'\n'
         fd,temp=tempfile.mkstemp(dir=target.parent,prefix='.lazycrawler-',suffix='.tmp')
@@ -183,4 +219,4 @@ class Companion:
         finally:
             if Path(temp).exists():Path(temp).unlink()
         db.put('companion_bundle',dict(path=str(target),payload_digest=digest,file_digest=hashlib.sha256(content.encode()).hexdigest(),generated_at=payload.get('generated_at'),published_at=db.now()))
-        self.last_revision=revision;self.last_output=db.now();self.pending=False;self.state='bundle ready — /reload in WoW' if game_state()=='running' else 'up to date'
+        self.last_revision=revision;self.last_output=db.now();self.pending=False;self.state='new data ready — live import or normal reload'

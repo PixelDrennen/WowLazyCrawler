@@ -196,7 +196,7 @@ function LC:RefreshUI()
     self.ui.lastPage=page;self.ui.lastListPage=self.listPage or 1
     local char=self:Current()
     if not char then return end
-    self.ui.heading:SetText(({queue="Session",setup="Setup",discover="Explore crafting",requirements="Requirements",session_options="Session options",housing="Decor workshop"})[page] or page)
+    self.ui.heading:SetText(({data_import="Live import",data_export="Character export",queue="Session",setup="Setup",discover="Explore crafting",requirements="Requirements",session_options="Session options",housing="Decor workshop"})[page] or page)
     for _,module in ipairs(modules) do if module[1]==page then self.ui.heading:SetText(module[2]) end end
     self.ui.sub:SetText(char.name.." - "..char.realm.."  /  "..(self.auctionOpen and "Auction house" or self.bankOpen and "Bank" or self.mailOpen and "Mailbox" or "Ready"))
     self:RefreshHeader()
@@ -300,6 +300,7 @@ function LC:RefreshUI()
             self:AddRow(name,m.required.." required · "..m.owned.." observed stock · "..m.missing.." missing"..eta)
         end
     elseif page=="settings" then
+        self:AddRow("Live data transfer / no reload","Market imports apply immediately. Current character captures can also be copied to the desktop without logging out or reloading.",action("Import market data",function() self.page="data_import";self:RefreshUI() end),action("Copy character capture",function() self.page="data_export";self:RefreshUI() end))
         self:AddRow("Synchronization",self.data.generated_at and ("Loaded bundle "..self.data.generated_at) or "ISSUE: No server bundle. Publish data from Companion in the desktop app, then /reload.")
         if self.data.market_diagnostics then local d=self.data.market_diagnostics;self:AddRow(d.title,d.message.."\n"..d.action) end
         for _,scope in ipairs({"bags","bank","mail","auctions"}) do local capture=char.storages[scope];if not capture then self:AddRow("Missing capture / "..scope,"Open this interface on this character. Wait for loading, then /reload to save and send the capture.") end end
@@ -318,7 +319,41 @@ function LC:RefreshUI()
         for label,err in pairs(self.errors) do self:AddRow("Diagnostic · "..label,tostring(err)) end
     end
     self:RenderRows()
+    if page=="data_import" or page=="data_export" then self:TransferUI(page)
+    else self.ui.scroll:Show();if self.ui.transfer then self.ui.transfer:Hide();self.ui.transfer.mode=nil end end
     self:FitWindow()
 end
 LC:On("PLAYER_REGEN_DISABLED",function() if LC.ui and LC.ui.frame:IsShown() and LC.db.settings.hideInCombat then LC.hiddenForCombat=true;LC.ui.frame:Hide() end end)
 LC:On("PLAYER_REGEN_ENABLED",function() if LC.hiddenForCombat then LC.hiddenForCombat=false;LC:ShowUI() end end)
+
+function LC:TransferUI(page)
+    local ui=self.ui
+    if not ui.transfer then
+        local panel=CreateFrame('Frame',nil,ui.frame);panel:SetPoint('TOPLEFT',18,-145);panel:SetPoint('BOTTOMRIGHT',-18,46);self:Skin(panel)
+        panel.title=self:Text(panel,15);panel.title:SetPoint('TOPLEFT',12,-12)
+        panel.detail=self:Text(panel,12,{.62,.69,.77});panel.detail:SetPoint('TOPLEFT',12,-38);panel.detail:SetPoint('TOPRIGHT',-12,-38);panel.detail:SetHeight(72)
+        local edit=CreateFrame('EditBox',nil,panel);edit:SetPoint('TOPLEFT',12,-110);edit:SetPoint('TOPRIGHT',-12,-110);edit:SetHeight(34);edit:SetFont('Fonts\\ARIALN.TTF',12);edit:SetAutoFocus(false);edit:SetMultiLine(false);edit:SetMaxLetters(4*1024*1024+20);self:Skin(edit)
+        edit:SetTextInsets(8,8,0,0);edit:SetScript('OnEscapePressed',function() edit:ClearFocus() end);panel.edit=edit
+        panel.apply=self:Button(panel,'Apply imported data',function()
+            if self:ImportMarketData(edit:GetText() or '') then edit:SetText('');edit:ClearFocus();self.page='radar';self:RefreshUI()
+            else panel.detail:SetText('Import failed: '..tostring(self.lastImportError or 'Check the copied bundle')..'. Copy fresh market data from the desktop and try again.') end
+        end,160);panel.apply:SetPoint('TOPLEFT',12,-158)
+        local back=self:Button(panel,'Back to session',function() edit:ClearFocus();self.page='overview';self:RefreshUI() end,140);back:SetPoint('TOPLEFT',180,-158)
+        ui.transfer=panel
+    end
+    local panel=ui.transfer;panel:Show();ui.scroll:Hide();ui.bar:Hide();ui.frame:SetHeight(430);ui.previous:Hide();ui.nextButton:Hide()
+    if panel.mode~=page then
+        panel.mode=page
+        if page=='data_import' then
+            panel.title:SetText('Apply live market data / no reload')
+            panel.detail:SetText('In the desktop app choose Copy live market data. Click below and press Ctrl+V, then Apply. This reads data only; it never executes imported code.')
+            panel.edit:SetText('');panel.apply:Show();panel.edit:SetFocus()
+        else
+            self:Export();local text='LC_CAPTURE1:'..self.db.exportJSON
+            panel.title:SetText('Send current character capture / no reload')
+            panel.detail:SetText('The latest accessible inventories and gold are ready below. Press Ctrl+C, then in the desktop app choose Import copied character capture. No reload or logout is needed.')
+            if #text>4*1024*1024 then text='';panel.detail:SetText('This capture exceeds the live clipboard limit. SavedVariables export remains available at normal logout/reload.') end
+            panel.edit:SetText(text);panel.edit:SetFocus();panel.edit:HighlightText();panel.apply:Hide()
+        end
+    end
+end

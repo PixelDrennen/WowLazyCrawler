@@ -57,6 +57,8 @@ type Config = {
   coverage_mode: string;
   wow_path: string;
   companion_enabled: boolean;
+  auto_app_updates: boolean;
+  auto_addon_updates: boolean;
   theme: string;
   scan_concurrency: number;
 };
@@ -219,10 +221,11 @@ type View = {
     pending: boolean;
     last_output: string | null;
     published_bundle: string | null;
-    loaded_bundle: { generated_at: string; observed_at: string; account_id: string } | null;
+    loaded_bundle: { generated_at: string; observed_at: string; account_id: string; transport?: "file" | "clipboard" } | null;
     last_sync: string | null;
     game_state: string;
     protocol: number;
+    addon_update: { state: string; error: string | null; installed_versions: Record<string, string | null> };
   };
   catalog: { source?: string; observed_at?: string; kind?: string };
   catalog_error: string | null;
@@ -232,9 +235,18 @@ type View = {
     features: Record<string, boolean>;
   };
 };
+type DesktopUpdate = {state: string; currentVersion: string; availableVersion: string | null; progress: number | null; error: string | null; lastChecked: string | null; automatic: boolean};
 declare global {
   interface Window {
-    lazyCrawler?: { chooseWowFolder: () => Promise<string | null> };
+    lazyCrawler?: {
+      chooseWowFolder: () => Promise<string | null>;
+      updateStatus: () => Promise<DesktopUpdate>;
+      copyMarketData: () => Promise<{generatedAt: string; candidates: number}>;
+      importCharacterCapture: () => Promise<unknown>;
+      checkUpdates: () => Promise<DesktopUpdate>;
+      installUpdate: () => Promise<DesktopUpdate>;
+      refreshUpdatePreferences: () => Promise<DesktopUpdate>;
+    };
   }
 }
 async function api<T>(
@@ -335,6 +347,14 @@ function App() {
     [clientId, setClientId] = useState(""),
     [clientSecret, setClientSecret] = useState(""),
     [estimate, setEstimate] = useState(120);
+  const [desktopUpdate, setDesktopUpdate] = useState<DesktopUpdate | null>(null);
+  useEffect(() => {
+    if (!window.lazyCrawler?.updateStatus) return;
+    let active = true;
+    const poll = () => window.lazyCrawler!.updateStatus().then(s => { if (active) setDesktopUpdate(s); }).catch(e => { if (active) setError(String(e)); });
+    void poll();const timer = setInterval(poll, 2000);
+    return () => { active = false; clearInterval(timer); };
+  }, []);
   async function load() {
     try {
       const [c, v] = await Promise.all([
@@ -393,6 +413,7 @@ function App() {
     const result = await api<Config>("settings", "PUT", c);
     setConfig(result);
     setDraft(result);
+    if (window.lazyCrawler?.refreshUpdatePreferences) setDesktopUpdate(await window.lazyCrawler.refreshUpdatePreferences());
   }
   const go = (p: string) => {
     setPage(p);
@@ -734,6 +755,7 @@ function App() {
           </div>
           <div className="header-right">
             <span className="mode-button"><span className="dot" />Live observations</span>
+            {desktopUpdate?.state === "downloaded" && <button className="primary" onClick={() => void action(async () => { await window.lazyCrawler!.installUpdate(); }, "Installing update")}>Restart to update to {desktopUpdate.availableVersion}</button>}
             <span className="local-tag">
               <ShieldCheck size={13} />
               Local & private
@@ -1640,6 +1662,34 @@ function App() {
           )}
           {page === "companion" && (
             <>
+              <section className="panel padded" style={{marginBottom: 24}}>
+                <div className="section-title"><div><h2>Automatic updates</h2><p>Desktop updates download here. Addon files update automatically while WoW is running; /reload applies new code. Market data can be imported without reloading.</p></div></div>
+                {window.lazyCrawler && <div className="toolbar">
+                  <button className="primary" disabled={busy} onClick={() => void action(async () => { await window.lazyCrawler!.copyMarketData(); }, "Market data copied. In WoW use /lc import, Ctrl+V, then Apply. No reload needed.")}>Copy live market data</button>
+                  <button className="secondary" disabled={busy} onClick={() => void action(() => window.lazyCrawler!.importCharacterCapture(), "Character capture imported without reload")}>Import copied character capture</button>
+                </div>}
+                <p className="muted">In WoW use /lc import for fresh market data, or /lc export to copy current inventories. Clipboard transfers apply immediately. The file bridge remains available at normal reload/logout; WoW does not expose background desktop network access.</p>
+                <div className="two-col">
+                  <div>
+                    <h3>Desktop application</h3>
+                    <p>{desktopUpdate ? `${desktopUpdate.state} · v${desktopUpdate.currentVersion}` : "Desktop updates are available in the installed Electron app."}{desktopUpdate?.availableVersion ? ` → v${desktopUpdate.availableVersion}` : ""}</p>
+                    {desktopUpdate?.progress != null && <progress max={100} value={desktopUpdate.progress} aria-label="Desktop update download" />}
+                    {desktopUpdate?.error && <p className="error-text" role="alert">{desktopUpdate.error}</p>}
+                    {window.lazyCrawler && <div className="toolbar"><button className="secondary" disabled={busy || desktopUpdate?.state === "downloading" || desktopUpdate?.state === "checking"} onClick={() => void action(async () => setDesktopUpdate(await window.lazyCrawler!.checkUpdates()), "Update check completed")}>Check for updates</button>{desktopUpdate?.state === "downloaded" && <button className="primary" onClick={() => void action(async () => { await window.lazyCrawler!.installUpdate(); }, "Installing update")}>Restart and install</button>}</div>}
+                    <p className="muted">Downloaded desktop updates install when you quit the desktop app, or choose Restart and install. Fedora may request administrator authentication for an RPM upgrade.</p>
+                    <Toggle label="Automatic desktop updates" detail="Check on launch and hourly; download stable releases and install on quit." checked={config.auto_app_updates} change={v => void action(() => save({...config, auto_app_updates: v}), "Update preference saved")} />
+                  </div>
+                  <div>
+                    <h3>WoW addon</h3>
+                    <p>{view.companion.addon_update.state}</p>
+                    <p className="muted">{Object.entries(view.companion.addon_update.installed_versions).map(([name, version]) => `${name}: ${version || "Not installed"}`).join(" · ")}</p>
+                    {view.companion.addon_update.error && <p className="error-text" role="alert">{view.companion.addon_update.error}</p>}
+                    <p className="muted">Keep LazyCrawler open. Both addon folders install/update together with rollback copies while you play. Use /reload after a code update; SavedVariables are preserved.</p>
+                    <Toggle label="Automatic addon updates" detail="Install/update both bundled addons automatically while WoW runs; /reload applies new code." checked={config.auto_addon_updates} change={v => void action(() => save({...config, auto_addon_updates: v}), "Addon update preference saved")} />
+                  </div>
+                </div>
+              </section>
+
               <div className="two-col">
                 <section className="panel padded">
                   <div className="section-title">
@@ -1670,7 +1720,7 @@ function App() {
                     <span>Published bundle identity</span><strong>{date(view.companion.published_bundle)}</strong>
                   </div>
                   <div className="pulse-row">
-                    <span>Last bundle acknowledged by addon</span><strong>{view.companion.loaded_bundle ? date(view.companion.loaded_bundle.generated_at) + (view.companion.loaded_bundle.generated_at === view.companion.published_bundle ? " · current publication" : " · older publication") : "Not reported — update addon and /reload"}</strong>
+                    <span>Last bundle acknowledged by addon</span><strong>{view.companion.loaded_bundle ? date(view.companion.loaded_bundle.generated_at) + (view.companion.loaded_bundle.transport === "clipboard" ? " · live import" : view.companion.loaded_bundle.generated_at === view.companion.published_bundle ? " · current publication" : " · older publication") : "Not reported — update addon and /reload"}</strong>
                   </div>
                   <div className="pulse-row">
                     <span>Pending outgoing data</span>
@@ -1688,7 +1738,7 @@ function App() {
                     <p className="error-text">{view.companion.error}</p>
                   )}
                   <small className="estimate-note">
-                    Published data loads on the next /reload. Installing addon code still requires WoW to be closed.
+                    Published data loads on the next /reload. Existing addon code updates apply on /reload. Data imports apply immediately.
                   </small>
                 </section>
                 <section className="panel padded">
@@ -1745,7 +1795,7 @@ function App() {
                     disabled={
                       busy ||
                       !config.wow_path ||
-                      view.companion.game_state !== "closed"
+                      false
                     }
                     onClick={() =>
                       void action(
@@ -1758,8 +1808,8 @@ function App() {
                     Install / update addon files
                   </button>
                   <small className="estimate-note">
-                    Close WoW to install or replace the data addon. No
-                    SavedVariables are overwritten.
+                    Addon files install while WoW runs. /reload applies code;
+                    live data imports need no reload. SavedVariables are preserved.
                   </small>
                 </section>
               </div>
@@ -1787,7 +1837,7 @@ function App() {
                   {
                     n: "04",
                     title: "Plans return safely",
-                    text: "Server results enter the separate data addon atomically. Use /reload to load a published bundle.",
+                    text: "Copy the latest market data into /lc import to apply it immediately. The data-addon file also loads at normal reload/login.",
                   },
                 ].map((s) => (
                   <section className="panel padded" key={s.n}>

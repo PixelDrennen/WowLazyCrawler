@@ -16,6 +16,8 @@ class Settings(BaseModel):
     coverage_mode: Literal['all_clusters'] = 'all_clusters'
     wow_path: str = Field(default='', max_length=1000)
     companion_enabled: bool = True
+    auto_addon_updates: bool = True
+    auto_app_updates: bool = True
     theme: Literal['grove','spectral','ember'] = 'grove'
     scan_concurrency: int = Field(default=3, ge=1, le=6)
     budget_gold: float = Field(default=50000, ge=0, le=1e9)

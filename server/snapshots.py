@@ -57,6 +57,7 @@ class Snapshot(Strict):
     account_id:str=Field(pattern=r'^[\w-]{1,100}$')
     addon_version:str=Field(max_length=40)
     loaded_bundle:str|None=Field(default=None,max_length=100)
+    loaded_transport:Literal['file','clipboard']='file'
     characters:dict[str,Character]=Field(max_length=100)
     warbank:Storage|None=None
     warbank_group:str|None=Field(default=None,pattern=r'^[\w:-]{1,100}$')
@@ -108,7 +109,8 @@ def accept_snapshot(value,origin='companion'):
             healthy=conn.execute("SELECT COUNT(*) FROM sources WHERE status IN ('ready','unchanged')").fetchone()[0])
         conn.execute('INSERT OR REPLACE INTO telemetry VALUES(?,?)',(stamp,json.dumps(telemetry)))
     db.put('last_addon_sync',stamp)
-    if snap.loaded_bundle:db.put('last_loaded_bundle',dict(generated_at=snap.loaded_bundle,observed_at=stamp,account_id=snap.account_id))
+    db.put('last_addon_version',snap.addon_version)
+    if snap.loaded_bundle:db.put('last_loaded_bundle',dict(generated_at=snap.loaded_bundle,observed_at=stamp,account_id=snap.account_id,transport=snap.loaded_transport))
     db.put('addon_integrations',snap.integrations)
     return dict(characters=len(snap.characters),accepted_at=stamp)
 
