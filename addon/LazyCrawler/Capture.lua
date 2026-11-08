@@ -57,13 +57,25 @@ function LC:CaptureBank()
                 local expected=self:Call(C_Bank.FetchNumPurchasedBankTabs,entry.kind)
                 if ids and (expected==nil or #ids>=expected) then
                     local items=self:BagItems(ids,true)
-                    if items then
-                        local money=self:Call(C_Bank.FetchDepositedMoney,entry.kind) or 0
-                        local result=storage(items,money,true,"Accessible purchased bank tabs observed")
-                        if entry.scope=="warbank" then self.db.warbank=result else char.storages.bank=result end
+                    if items and (entry.scope~="bank" or #ids>0) then
+                        local money=0
+                        if entry.scope=="warbank" then money=self:Call(C_Bank.FetchDepositedMoney,entry.kind) end
+                        if money~=nil then
+                            local result=storage(items,money,true,"Accessible purchased bank tabs observed")
+                            if entry.scope=="warbank" then self.db.warbank=result else char.storages.bank=result end
+                            self.errors["Capture "..entry.scope]=nil
+                        else self.errors["Capture "..entry.scope]="Bank money is not loaded; prior observation preserved." end
                     end
+                else self.errors["Capture "..entry.scope]="Bank tabs are not loaded. Select a purchased tab and wait." end
+                -- Some Retail clients still use legacy character-bank containers even when C_Bank exists.
+                if entry.scope=="bank" and ids and #ids==0 and (self:Call(C_Container.GetContainerNumSlots,BANK_CONTAINER or -1) or 0)>0 then
+                    local legacy={BANK_CONTAINER or -1}
+                    local purchased=GetNumBankSlots and GetNumBankSlots() or 0
+                    for bag=1,purchased do legacy[#legacy+1]=(NUM_TOTAL_EQUIPPED_BAG_SLOTS or 5)+bag end
+                    local items=self:BagItems(legacy)
+                    if items then char.storages.bank=storage(items,0,true,"Accessible character bank containers");self.errors["Capture bank"]=nil end
                 end
-            end
+            else self.errors["Capture "..entry.scope]="Not viewable. Open this bank type and select a purchased tab." end
         end
     else
         local ids={BANK_CONTAINER or -1}
@@ -83,7 +95,8 @@ function LC:CaptureMail()
     local items,money={},0
     for index=1,count do
         local _,_,_,_,cash,cod,_,attachments=GetInboxHeaderInfo(index)
-        if cash and (not cod or cod==0) then money=money+cash end
+        if cash==nil then self.errors["Capture mail"]="Mailbox headers are still loading; prior capture preserved.";return end
+        if not cod or cod==0 then money=money+cash end
         if attachments and (type(attachments)~="number" or attachments>0) then
             for attachment=1,(ATTACHMENTS_MAX_RECEIVE or 16) do
                 local link=GetInboxItemLink(index,attachment)
@@ -93,6 +106,7 @@ function LC:CaptureMail()
             end
         end
     end
+    self.errors["Capture mail"]=nil
     char.storages.mail=storage(items,money,count>=(total or count),"Uncollected mailbox gold; COD attachments are not usable stock")
     if self.AdvanceTasks then self:AdvanceTasks("mail") end
     self:Changed()
@@ -128,15 +142,23 @@ function LC:CaptureGuildBank()
     self:Changed()
 end
 LC:On("BAG_UPDATE_DELAYED",function() LC:CaptureBags();if LC.bankOpen then LC:CaptureBank() end end)
-LC:On("PLAYER_MONEY",function() LC:CaptureBags() end)
+LC:On("PLAYER_MONEY",function() if LC.bankOpen then LC:CaptureBank() else LC:CaptureBags() end end)
 LC:On("PLAYER_EQUIPMENT_CHANGED",function() LC:CaptureEquipped() end)
 LC:On("PLAYER_REGEN_ENABLED",function() if LC.captureDeferred then LC.captureDeferred=false;LC:CaptureBags() end end)
-LC:On("BANKFRAME_OPENED",function() LC.bankOpen=true;C_Timer.After(.3,function() LC:Run("bank",function() LC:CaptureBank() end) end) end)
+LC:On("BANKFRAME_OPENED",function()
+    LC.bankOpen=true
+    for _,delay in ipairs({.3,1,3}) do C_Timer.After(delay,function() LC:Run("bank",function() LC:CaptureBank() end) end) end
+end)
 LC:On("PLAYERBANKSLOTS_CHANGED",function() LC:CaptureBank() end)
 LC:On("PLAYER_ACCOUNT_BANK_TAB_SLOTS_CHANGED",function() LC:CaptureBank() end)
 LC:On("BANK_TABS_CHANGED",function() LC:CaptureBank() end)
 LC:On("BANKFRAME_CLOSED",function() LC.bankOpen=false end)
-LC:On("MAIL_SHOW",function() LC.mailOpen=true;LC:CaptureMail() end)
+LC:On("MAIL_SHOW",function()
+    LC.mailOpen=true
+    if CheckInbox then LC:Call(CheckInbox) end
+    LC:CaptureMail()
+    for _,delay in ipairs({1,3}) do C_Timer.After(delay,function() LC:Run("mail",function() LC:CaptureMail() end) end) end
+end)
 LC:On("MAIL_INBOX_UPDATE",function() LC:CaptureMail() end)
 LC:On("MAIL_CLOSED",function() LC.mailOpen=false end)
 LC:On("AUCTION_HOUSE_SHOW",function() LC.auctionOpen=true;if C_AuctionHouse then LC:Call(C_AuctionHouse.QueryOwnedAuctions,{}) end end)

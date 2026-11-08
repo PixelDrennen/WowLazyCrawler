@@ -14,6 +14,10 @@ end
 function Frame:GetFrameLevel() return self.level or 1 end
 function Frame:SetFrameLevel(level) self.level=level end
 function Frame:SetSize(w,h) assert(type(w)=='number' and type(h)=='number');self.width=w;self.height=h end
+function Frame:SetShown(value) self.shown=not not value end
+function Frame:SetHeight(h) self.height=h end
+function Frame:SetVerticalScroll(value) self.scroll=value end
+function Frame:GetVerticalScroll() return self.scroll or 0 end
 function Frame:SetWidth(w) self.width=w end
 function Frame:GetWidth() return self.width or 850 end
 function Frame:GetHeight() return self.height or 700 end
@@ -61,7 +65,7 @@ C_Container={
 }
 ItemLocation={CreateFromBagAndSlot=function(_,bag,slot)return {bag=bag,slot=slot}end}
 Enum={BankType={Character=1,Account=2}}
-C_Bank={CanViewBank=function()return true end,FetchPurchasedBankTabIDs=function(kind)return kind==2 and {100} or {} end,FetchDepositedMoney=function()return 500000 end,
+C_Bank={CanUseBank=function()return true end,CanViewBank=function()return true end,FetchPurchasedBankTabIDs=function(kind)return kind==2 and {100} or {} end,FetchDepositedMoney=function()return 500000 end,
  IsItemAllowedInBankType=function(kind,loc)local i=BAG_DATA[loc.bag][loc.slot];return i.transferable end}
 C_AuctionHouse={GetNumOwnedAuctions=function()return 0 end,QueryOwnedAuctions=function()end,SendSearchQuery=function()end}
 C_AddOns={IsAddOnLoaded=function()return false end}

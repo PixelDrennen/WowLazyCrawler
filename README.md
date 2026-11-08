@@ -7,12 +7,12 @@ LazyCrawler is an **in-game economic workflow addon**, backed by a self-hosted m
 Download the `lazycrawler-linux-x64` artifact from a successful [Validate and package](https://github.com/PixelDrennen/WowLazyCrawler/actions) run and extract it:
 
 ```sh
-sudo dnf install ./wowlazycrawler-0.2.0.x86_64.rpm
+sudo dnf install ./wowlazycrawler-0.3.0.x86_64.rpm
 ```
 
 Open **WoW LazyCrawler** from Plasma's application menu. The backend and dashboard are bundled; no external browser, Python or Node installation is needed. AppImage is included as an alternative. Desktop shortcuts, source builds, headless service, migration, and recovery are covered in [installation](docs/installation.md).
 
-The existing desktop identity and XDG data directory remain unchanged, so the RPM upgrades 0.1.0 in place. SQLite schema v2 adds addon observations without discarding prices or configuration.
+The existing desktop identity and XDG data directory remain unchanged, so the RPM upgrades previous versions in place. SQLite schema v2 adds addon observations without discarding prices or configuration.
 
 ## Administrative workspace
 
@@ -24,7 +24,7 @@ The existing desktop identity and XDG data directory remain unchanged, so the RP
 - Service refresh intervals, concurrency, data retention, price freshness, credentials, health, diagnostics, charts and backups.
 - Grove, Spectral and Ember palettes; the established desktop installation and visual language are preserved.
 
-**Demonstration mode is enabled by default for this update**, as requested. All simulated characters, prices, queues and graphs are prominently labeled. Actual process/job/connection diagnostics remain live. Demo records never enter real observation tables or the outgoing addon data. Use the header toggle to inspect live data.
+The dashboard displays live observations only, including after upgrading an older demo-enabled configuration. Missing captures, unknown balances, failed feeds and unpublished bundles are visible issues; no synthetic records replace them.
 
 ## Connect the addon
 
@@ -33,13 +33,17 @@ The existing desktop identity and XDG data directory remain unchanged, so the RP
 3. Enable both addons on the Retail character screen. Run `/lc` in game.
 4. Log into characters normally. Open bank, mailbox, auction house and professions when needed; accessible data is captured automatically. No character/inventory forms are required.
 5. A reload/logout saves the addon export. The companion reads stable SavedVariables without executing Lua or overwriting those files.
-6. Run or schedule a region refresh. Recommendations are written atomically into the separate data addon **only while WoW is closed**, then load on the next client start.
+6. Run or schedule a region refresh. Recommendations are written atomically into the separate data addon, including while WoW is running. Wait for **bundle ready**, then `/reload` to load them.
 
-WoW addons cannot make arbitrary HTTP calls. This is an automatic file-based exchange with an explicit game-save boundary, not a false promise of live HTTP or live code injection. If the companion cannot determine that WoW is closed, it defers outgoing writes.
+WoW addons cannot make arbitrary HTTP calls. This is an automatic file-based exchange with an explicit game-save boundary, not a false promise of live HTTP or live code injection. Only the separate data file can update while playing; installing executable addon files still requires WoW to be closed. SavedVariables are never written by the companion.
 
 ## In-game addon (early client-validation build)
 
-The addon includes automatic captures; a resizable, paginated, themed UI; contextual help; guided arbitrage task states; single-item warbank moves with eligibility checks; player-click posting; matching sale-mail collection; known recipe/decor classification; available CraftSim recipe simulation; consolidated resolved materials; Auctionator search capability checks; and personal lumber sessions/provider registration.
+The compact task window has a permanent character/warbank/mail gold header, rounded controls, native icon textures, neutral palettes and an overflow-only scrollbar. Start **Realm flip**, **Posting**, or **Craft available** sessions, with persistent elapsed time, pause/resume and stop controls. Time offline is excluded. Targets can change during a run: minimum stock defaults to 1, bulk acquisition to 3, and posting wallet to 500g. Bank actions move one stack per click; oversized withdrawals split into a free bag slot and wallet top-ups withdraw only the difference. Unavailable routes can be skipped.
+
+Realm runs group queued routes by distinct market, guide buying and consolidation across source alts, then withdrawals, TSM posting and undercut review across destination alts. Missing characters are identified. Purchases and TSM posting remain player actions. Live auction-key undercut checks are available per posted variant; partial results never report a completed scan, and the TSM review is explicitly acknowledged by the player.
+
+Craft available selects fresh profitable CraftSim observations from learned, enabled recipes on the current character, prepares minimum-stock quantities and materials, checks output stock, then guides warbank consolidation. **Explore crafting** has no timer: captured learned/unlearned recipes across characters are ranked by price-backed estimated profit and regional demand, with requirements detail and explicit unknowns. It does not invent an unseen global recipe catalog or choose reagent quality tiers.
 
 Wallet gold and warbank gold are separate from mailbox receivables. COD attachments, guild storage, equipped items and auctions are excluded from usable crafting stock. Cross-character bound/unknown-transfer items are excluded, and stale stock is not silently considered available. Shared bank identity uses the Battle.net account identifier when available; unresolved accounts conservatively share one unknown-region bank group instead of multiplying its funds.
 

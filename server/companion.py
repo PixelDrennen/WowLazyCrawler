@@ -145,11 +145,11 @@ class Companion:
             if self.last_read.get(str(path))==digest:continue
             accept_snapshot(decode_saved_export(content))
             self.last_read[str(path)]=digest
-        # Outgoing recommendations are loaded as a separate data addon at startup.
+        # Only the separate data addon is replaced, atomically. WoW reads it on login or /reload.
+        # SavedVariables and executable addon code are never written by this path.
         revision=(db.get('last_addon_sync'),db.get('market_revision'),db.get('config_revision'))
         if revision==self.last_revision:return
         self.pending=True
-        if game_state()!='closed':self.state='waiting for WoW to close';return
         target=root/'Interface'/'AddOns'/'LazyCrawler_Data'/'Data.lua'
         if not target.parent.is_dir():self.state='addon installation needed';return
         if not target.resolve().is_relative_to(root):raise ValueError('Unsafe addon output path')
@@ -160,9 +160,7 @@ class Companion:
         fd,temp=tempfile.mkstemp(dir=target.parent,prefix='.lazycrawler-',suffix='.tmp')
         try:
             with os.fdopen(fd,'w',encoding='utf-8') as stream:stream.write(content)
-            # Recheck immediately before replacing; never update known-running clients.
-            if game_state()!='closed':return
             os.replace(temp,target)
         finally:
             if Path(temp).exists():Path(temp).unlink()
-        self.last_revision=revision;self.last_output=db.now();self.pending=False;self.state='up to date'
+        self.last_revision=revision;self.last_output=db.now();self.pending=False;self.state='bundle ready — /reload in WoW' if game_state()=='running' else 'up to date'
