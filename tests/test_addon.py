@@ -232,3 +232,42 @@ def test_start_crafting_reads_open_craftsim_recipe_without_waiting_for_another_g
     assert lua.eval('LC:Current().recipes[1].simulation.profit_copper')==50000
     lua.execute('LC:Export();LC:CaptureSimulation()')
     assert lua.eval('LC.dirty') is False  # Stable simulations do not create an export/refresh loop.
+
+
+def test_empty_radar_identifies_loaded_bundle_and_market_readiness(lua):
+    lua.execute('''LC.data.generated_at='2026-11-08T14:12:58+00:00';LC:ShowUI();LC.page='radar';LC:RefreshUI()''')
+    assert 'Bundle loaded; no route candidates' in lua.eval('LC.renderRows[1].title')
+    lua.execute('''LC.data.market_diagnostics={region='us',title='Market prices are missing',message='No prices imported',action='Run a region refresh',fresh_markets=0,total_markets=100,fresh_owned_markets=0,owned_markets=1,fresh_regional_rows=0,source_errors={}}
+        LC:RefreshUI();LC:Export()''')
+    assert lua.eval('LC.renderRows[1].title')=='Bundle loaded / Market prices are missing'
+    assert 'region refresh' in lua.eval('LC.renderRows[1].detail')
+    assert json.loads(lua.globals().LC.db.exportJSON)['loaded_bundle']=='2026-11-08T14:12:58+00:00'
+    lua.execute("LC.data.opportunities={{expires_at=NOW-1}};LC:RefreshUI()")
+    assert lua.eval('LC.renderRows[1].title')=='Loaded route evidence expired'
+
+
+def test_live_json_import_applies_without_reload_and_survives_initialization(lua):
+    plan=dict(schema_version=2,origin='live',region='us',generated_at='2026-11-08T14:00:00+00:00',generated_epoch=int(time.time()),opportunities=[],catalog=[],crafting=[],crafting_discovery=[])
+    assert lua.eval('function(text)return LC:ImportMarketData(text)end')('LC1:'+json.dumps(plan)) is True
+    assert lua.globals().LC.data.generated_at==plan['generated_at']
+    lua.execute('LC:Initialize();LC:ShowUI();LC.page="data_export";LC:RefreshUI()')
+    assert lua.globals().LC.data.generated_at==plan['generated_at']
+    assert lua.eval('LC.ui.transfer.edit.text').startswith('LC_CAPTURE1:')
+    capture=json.loads(lua.eval('LC.ui.transfer.edit.text')[12:])
+    assert Snapshot.model_validate(capture).loaded_bundle==plan['generated_at']
+
+
+def test_live_import_rejects_code_malformed_data_wrong_region_and_older_bundle_atomically(lua):
+    def apply(value):return lua.eval('function(text)return LC:ImportMarketData(text)end')(value)
+    before=lua.globals().LC.data
+    assert apply('LC1:os.execute("anything")') is False
+    assert apply('LC1:'+json.dumps(dict(schema_version=2,origin='live',region='eu'))) is False
+    assert apply('LC1:{"schema_version":2,}') is False
+    assert lua.globals().LC.data.generated_at is None
+    plan=dict(schema_version=2,origin='live',region='us',generated_at='latest',generated_epoch=int(time.time()),opportunities=[],catalog=[])
+    assert apply('LC1:'+json.dumps(plan)) is True
+    plan['generated_epoch']-=100
+    assert apply('LC1:'+json.dumps(plan)) is False
+    assert lua.globals().LC.data.generated_at=='latest'
+    decoded=json.loads(lua.eval('function(text)return LC:JSON(LC:DecodeDataJSON(text))end')('{"name":"\\u00c9lodie \\ud83d\\udc7b","enabled":false,"nested":[1,2,3]}'))
+    assert decoded['name']=='Élodie 👻' and decoded['enabled'] is False

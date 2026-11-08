@@ -114,7 +114,7 @@ def test_savedvariables_decoder_never_executes_and_handles_utf8():
     with pytest.raises(ValueError):decode_saved_export('LazyCrawlerDB = os.execute("something")')
 
 
-def test_companion_publishes_data_for_reload_but_blocks_install_while_game_running(client,tmp_path):
+def test_companion_publishes_data_and_installs_while_game_running(client,tmp_path):
     root=tmp_path/'wow'/'_retail_';root.mkdir(parents=True);(root/'Wow.exe').touch()
     out=root/'Interface'/'AddOns'/'LazyCrawler_Data';out.mkdir(parents=True);target=out/'Data.lua';target.write_text('original')
     config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
@@ -122,8 +122,8 @@ def test_companion_publishes_data_for_reload_but_blocks_install_while_game_runni
     with patch('server.companion.game_state',return_value='running'):
         worker.tick()
         assert 'LazyCrawlerData = ' in target.read_text() and not worker.pending
-        assert '/reload' in worker.state
-        with pytest.raises(ValueError):install_addons(str(root))
+        assert worker.last_output
+        assert install_addons(str(root))['installed']
     with patch('server.companion.game_state',return_value='closed'):
         worker.tick()
         assert 'LazyCrawlerData = ' in target.read_text() and not worker.pending
@@ -222,3 +222,99 @@ def test_crafting_discovery_uses_prices_and_demand_without_inventing_unlocks(cli
     recipe['materials'][0]['alternatives']=[2008,2009];accept_snapshot(value)
     assert client.get('/api/addon/plan').json()['crafting_discovery'][0]['profit_copper'] is None
     assert client.get('/api/admin').json()['crafting']==[]  # Unlearned recipe is discovery, not a craftable queue.
+
+
+def test_bundle_distinguishes_missing_prices_from_missing_transport(client):
+    accept_snapshot(snapshot())
+    plan=client.get('/api/addon/plan').json()
+    assert plan['generated_at'] and plan['opportunities']==[]
+    info=plan['market_diagnostics']
+    assert info['state']=='prices_missing' and info['owned_markets']==1
+    assert 'Character captures and market prices are separate' in info['message']
+    assert 'region refresh' in info['action']
+    assert client.get('/api/admin').json()['market_diagnostics']['state']=='prices_missing'
+
+
+def test_readiness_distinguishes_fresh_filtered_stale_and_home_missing(client):
+    from server.ingest import save_snapshot
+    from server.market import parse_tsm
+    from server.diagnostics import market_readiness
+    from server.models import Settings
+    accept_snapshot(snapshot())
+    groups=markets('us');home=next(m for m in groups if m['connected_id'] in character_markets('us'))['representative']
+    others=[m['representative'] for m in groups if m['representative']!=home][:2]
+    config=Settings();stamp=db.now()
+    header='itemId,name,marketValue,minBuyout,historical,avgSalePrice,soldPerDay,updatedAt\n'
+    def add(scope,realm,when):
+        source='tsm:us:'+scope+':'+realm
+        save_snapshot(source,parse_tsm(header+'123,Test,100000,100000,100000,100000,2,'+when,'us',scope,realm,source,stamp))
+    add('region','',stamp)
+    for realm in others:add('realm',realm,stamp)
+    assert market_readiness(config,0)['state']=='home_prices_missing'
+    add('realm',home,stamp)
+    assert market_readiness(config,0)['state']=='no_matches'
+    assert market_readiness(config,1)['state']=='ready'
+    assert market_readiness(config,0,True)['scanning'] is True
+    assert 'running' in market_readiness(config,0,True)['action']
+    with db.connect() as conn:conn.execute("UPDATE observations SET observed_at='2000-01-01T00:00:00+00:00'")
+    assert market_readiness(config,0)['state']=='prices_stale'
+    config.tsm_enabled=False
+    assert market_readiness(config,0)['state']=='pricing_disabled'
+
+
+def test_identical_bundle_not_republished_and_loaded_identity_acknowledged(client,tmp_path):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
+    with patch('server.companion.game_state',return_value='closed'):install_addons(str(root))
+    worker=Companion();worker.plan_provider=lambda:dict(origin='live',schema_version=2,generated_at=db.now(),generated_epoch=int(time.time()),opportunities=[])
+    worker.tick();target=root/'Interface'/'AddOns'/'LazyCrawler_Data'/'Data.lua'
+    published=worker.status()['published_bundle'];first=target.read_bytes();mtime=target.stat().st_mtime_ns
+    value=snapshot();value['loaded_bundle']=published;accept_snapshot(value)
+    worker.tick()
+    assert target.read_bytes()==first and target.stat().st_mtime_ns==mtime
+    assert worker.status()['loaded_bundle']['generated_at']==published
+    assert 'acknowledged' in worker.state
+    target.write_text('manually replaced')
+    db.put('config_revision','changed');worker.tick()
+    assert 'LazyCrawlerData = ' in target.read_text()  # A changed/deleted file must be repaired despite identical semantic data.
+
+
+def test_addon_auto_update_installs_first_time_and_updates_running_client_without_touching_saves(client,tmp_path):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
+    worker=Companion();worker.plan_provider=lambda:dict(origin='live',schema_version=2,generated_at=db.now(),opportunities=[])
+    with patch('server.companion.game_state',return_value='running'):
+        worker.tick();assert '/reload' in worker.addon_update['state']
+        assert (root/'Interface'/'AddOns'/'LazyCrawler').exists()
+    with patch('server.companion.game_state',return_value='closed'):worker.tick()
+    target=root/'Interface'/'AddOns'/'LazyCrawler'/'UI.lua';expected=target.read_bytes();target.write_text('old version')
+    saved=root/'WTF'/'Account'/'a'/'SavedVariables';saved.mkdir(parents=True)
+    export=saved/'LazyCrawler.lua';export.write_text('LazyCrawlerDB = {["exportJSON"] = '+lua_literal(json.dumps(snapshot()))+'}')
+    before=export.read_bytes()
+    with patch('server.companion.game_state',return_value='running'):worker.tick()
+    assert target.read_bytes()==expected
+    assert (target.parent.parent/'LazyCrawler.previous'/'UI.lua').read_text()=='old version'
+    assert export.read_bytes()==before
+    assert '/reload' in worker.addon_update['state']
+
+
+def test_addon_update_rolls_back_both_directories_on_partial_failure(client,tmp_path,monkeypatch):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    with patch('server.companion.game_state',return_value='closed'):install_addons(str(root))
+    addons=root/'Interface'/'AddOns';first=addons/'LazyCrawler'/'Core.lua';second=addons/'LazyCrawler_Data'/'Data.lua'
+    first.write_text('first original');second.write_text('second original');original=Path.rename
+    def fail_second(path,target):
+        if path.name=='LazyCrawler_Data' and path.parent.name.startswith('.lazycrawler-install-'):raise OSError('simulated second-directory failure')
+        return original(path,target)
+    monkeypatch.setattr(Path,'rename',fail_second)
+    with patch('server.companion.game_state',return_value='running'):
+        with pytest.raises(OSError):install_addons(str(root))
+    assert first.read_text()=='first original' and second.read_text()=='second original'
+
+
+def test_automatic_addon_update_preference_is_respected(client,tmp_path):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    config=client.get('/api/settings').json();config.update(wow_path=str(root),auto_addon_updates=False);client.put('/api/settings',json=config).raise_for_status()
+    worker=Companion()
+    with patch('server.companion.game_state',return_value='closed'):worker.tick()
+    assert 'disabled' in worker.addon_update['state'] and not (root/'Interface').exists()

@@ -7,12 +7,18 @@ LazyCrawler is an **in-game economic workflow addon**, backed by a self-hosted m
 Download the `lazycrawler-linux-x64` artifact from a successful [Validate and package](https://github.com/PixelDrennen/WowLazyCrawler/actions) run and extract it:
 
 ```sh
-sudo dnf install ./wowlazycrawler-0.3.0.x86_64.rpm
+sudo dnf install ./wowlazycrawler-0.4.0.x86_64.rpm
 ```
 
 Open **WoW LazyCrawler** from Plasma's application menu. The backend and dashboard are bundled; no external browser, Python or Node installation is needed. AppImage is included as an alternative. Desktop shortcuts, source builds, headless service, migration, and recovery are covered in [installation](docs/installation.md).
 
 The existing desktop identity and XDG data directory remain unchanged, so the RPM upgrades previous versions in place. SQLite schema v2 adds addon observations without discarding prices or configuration.
+
+## Automatic updates
+
+This first updater-enabled desktop version requires one final manual RPM/AppImage upgrade. Future stable releases are published automatically to GitHub after main passes tests and packaging. The app checks on launch and hourly, downloads verified update assets, and installs when you quit the desktop app or choose **Restart and install**. Fedora may request its normal administrator authentication for RPM upgrades. AppImage uses its own updater.
+
+The desktop bundles both addons and automatically installs newer files into the configured WoW folder, staging both folders with rollback on partial failure and retaining `.previous` copies. SavedVariables are untouched. New addon code requires `/reload`, not a game restart. Live data import/export does not require either. Preferences, progress, installed versions and failures are visible in **Addon connection**. Source/headless launches do not attempt to replace their own executable.
 
 ## Administrative workspace
 
@@ -28,16 +34,18 @@ The dashboard displays live observations only, including after upgrading an olde
 
 ## Connect the addon
 
-1. Close WoW. In **Addon connection**, choose your Retail folder (or its parent World of Warcraft folder) and save.
-2. Click **Install / update addon files**. Alternatively extract `LazyCrawler-addon.zip` into `_retail_/Interface/AddOns/`. It contains `LazyCrawler` and `LazyCrawler_Data`.
+1. In **Addon connection**, choose your Retail folder (or its parent World of Warcraft folder) and save.
+2. Both addons install/update automatically, including while WoW runs. Use `/reload` after code installation; no full game restart is required. Manual ZIP installation remains optional.
 3. Enable both addons on the Retail character screen. Run `/lc` in game.
 4. Log into characters normally. Open bank, mailbox, auction house and professions when needed; accessible data is captured automatically. No character/inventory forms are required.
-5. A reload/logout saves the addon export. The companion reads stable SavedVariables without executing Lua or overwriting those files.
-6. Run or schedule a region refresh. Recommendations are written atomically into the separate data addon, including while WoW is running. Wait for **bundle ready**, then `/reload` to load them.
+5. For immediate capture transfer, run `/lc export`, press Ctrl+C, and choose **Import copied character capture** in the desktop app. Normal reload/logout also saves captures automatically; SavedVariables are never overwritten by the companion.
+6. Run or schedule a region refresh. Choose **Copy live market data** in the desktop app, then `/lc import`, paste and Apply in WoW. Data applies immediately without reloading. The separate data addon also loads at normal reload/login.
 
-WoW addons cannot make arbitrary HTTP calls. This is an automatic file-based exchange with an explicit game-save boundary, not a false promise of live HTTP or live code injection. Only the separate data file can update while playing; installing executable addon files still requires WoW to be closed. SavedVariables are never written by the companion.
+WoW addons cannot make arbitrary HTTP calls. This is an automatic file-based exchange with an explicit game-save boundary, not a false promise of live HTTP or live code injection. Addon files can be installed while playing and apply on `/reload`; explicit clipboard data transfers apply immediately. SavedVariables are never written by the companion.
 
 ## In-game addon (early client-validation build)
+
+Market readiness is separate from file transport: Radar and the dashboard identify missing/stale regional prices, uncovered character markets, disabled pricing, feed errors, and valid zero-match results. Addon connection compares the published bundle with the last identity acknowledged by the addon. Unchanged captures do not publish an identical bundle with a new timestamp.
 
 The compact task window has a permanent character/warbank/mail gold header, rounded controls, native icon textures, neutral palettes and an overflow-only scrollbar. Start **Realm flip**, **Posting**, or **Craft available** sessions, with persistent elapsed time, pause/resume and stop controls. Time offline is excluded. Targets can change during a run: minimum stock defaults to 1, bulk acquisition to 3, and posting wallet to 500g. Bank actions move one stack per click; oversized withdrawals split into a free bag slot and wallet top-ups withdraw only the difference. Unavailable routes can be skipped.
 

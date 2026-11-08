@@ -1,6 +1,6 @@
 {
   "name": "wowlazycrawler",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Self-hosted WoW auction and crafting intelligence",
   "author": {
     "name": "Drennen Dooms"
@@ -12,7 +12,7 @@
     "build:web": "npm --prefix web run build",
     "build:server": ".venv/bin/python -m PyInstaller --noconfirm --clean --onedir --name lazycrawler-server --distpath build/backend --workpath build/pyinstaller --add-data 'web/dist:web/dist' --add-data 'addon:addon' --collect-all uvicorn --collect-all server server_entry.py",
     "desktop": "npm run build:web && electron .",
-    "package:linux": "npm run build:web && npm run build:server && npm run package:addon && electron-builder --linux rpm AppImage",
+    "package:linux": "npm run build:web && npm run build:server && npm run package:addon && electron-builder --linux rpm AppImage --publish never",
     "package:dir": "npm run build:web && npm run build:server && electron-builder --linux dir",
     "package:addon": "python3 scripts/package-addon.py"
   },
@@ -65,7 +65,8 @@
         "libdrm",
         "libxkbcommon",
         "at-spi2-atk",
-        "xdg-utils"
+        "xdg-utils",
+        "polkit"
       ],
       "fpm": [
         "--rpm-rpmbuild-define",
@@ -74,12 +75,23 @@
     },
     "appImage": {
       "artifactName": "WoW-LazyCrawler-${version}-${arch}.AppImage"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "PixelDrennen",
+        "repo": "WowLazyCrawler",
+        "releaseType": "release"
+      }
+    ]
   },
   "desktopName": "wowlazycrawler.desktop",
   "homepage": "https://github.com/PixelDrennen/WowLazyCrawler",
   "repository": {
     "type": "git",
     "url": "https://github.com/PixelDrennen/WowLazyCrawler.git"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.11"
   }
 }
