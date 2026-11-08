@@ -200,6 +200,7 @@ type View = {
   }[];
   origin: "demo" | "live";
   generated_at: string;
+  market_diagnostics: {state: string; title: string; message: string; action: string; fresh_markets: number; total_markets: number; fresh_owned_markets: number; owned_markets: number; fresh_regional_rows: number; source_errors: {id: string; error: string}[]};
   characters: Character[];
   warbanks: (Capture & { account_id: string })[];
   coverage: Market[];
@@ -217,6 +218,8 @@ type View = {
     error: string | null;
     pending: boolean;
     last_output: string | null;
+    published_bundle: string | null;
+    loaded_bundle: { generated_at: string; observed_at: string; account_id: string } | null;
     last_sync: string | null;
     game_state: string;
     protocol: number;
@@ -817,7 +820,11 @@ function App() {
             )}
           </div>
           <section className="data-health" aria-label="Data availability">
-            <strong>Data availability · observed sources only</strong>
+            <strong>{view.market_diagnostics.title}</strong>
+            {page === "companion" && view.market_diagnostics.state !== "ready" && config.tsm_enabled && <div className="toolbar">{scan()}<button className="secondary" onClick={() => go("health")}>Inspect feed health</button></div>}
+            <p>{view.market_diagnostics.message} {view.market_diagnostics.action}</p>
+            <p>{view.market_diagnostics.fresh_markets} / {view.market_diagnostics.total_markets} fresh markets · {view.market_diagnostics.fresh_owned_markets} / {view.market_diagnostics.owned_markets} character markets · {view.market_diagnostics.fresh_regional_rows} fresh demand rows</p>
+            {view.market_diagnostics.source_errors.map(source => <p key={source.id} role="alert">{source.id}: {source.error}</p>)}
             {!view.last_sync && <p>No addon export received. Open LazyCrawler in WoW, then /reload. The companion imports the saved capture within about 20 seconds.</p>}
             {view.characters.length > 0 && <p>{view.characters.filter(c => !c.captures.bank).length} characters without bank captures · {view.characters.filter(c => !c.captures.mail).length} without mailbox captures · {view.characters.filter(c => !c.captures.auctions).length} without auction captures. Open each interface on the relevant character, then /reload.</p>}
             {view.warbanks.length === 0 && <p>Warbank balance unknown. Open a purchased warbank tab and wait for its contents to load.</p>}
@@ -1658,6 +1665,12 @@ function App() {
                   <div className="pulse-row">
                     <span>Last data-addon update</span>
                     <strong>{date(view.companion.last_output)}</strong>
+                  </div>
+                  <div className="pulse-row">
+                    <span>Published bundle identity</span><strong>{date(view.companion.published_bundle)}</strong>
+                  </div>
+                  <div className="pulse-row">
+                    <span>Last bundle acknowledged by addon</span><strong>{view.companion.loaded_bundle ? date(view.companion.loaded_bundle.generated_at) + (view.companion.loaded_bundle.generated_at === view.companion.published_bundle ? " · current publication" : " · older publication") : "Not reported — update addon and /reload"}</strong>
                   </div>
                   <div className="pulse-row">
                     <span>Pending outgoing data</span>

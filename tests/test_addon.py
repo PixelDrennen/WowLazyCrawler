@@ -232,3 +232,15 @@ def test_start_crafting_reads_open_craftsim_recipe_without_waiting_for_another_g
     assert lua.eval('LC:Current().recipes[1].simulation.profit_copper')==50000
     lua.execute('LC:Export();LC:CaptureSimulation()')
     assert lua.eval('LC.dirty') is False  # Stable simulations do not create an export/refresh loop.
+
+
+def test_empty_radar_identifies_loaded_bundle_and_market_readiness(lua):
+    lua.execute('''LC.data.generated_at='2026-11-08T14:12:58+00:00';LC:ShowUI();LC.page='radar';LC:RefreshUI()''')
+    assert 'Bundle loaded; no route candidates' in lua.eval('LC.renderRows[1].title')
+    lua.execute('''LC.data.market_diagnostics={region='us',title='Market prices are missing',message='No prices imported',action='Run a region refresh',fresh_markets=0,total_markets=100,fresh_owned_markets=0,owned_markets=1,fresh_regional_rows=0,source_errors={}}
+        LC:RefreshUI();LC:Export()''')
+    assert lua.eval('LC.renderRows[1].title')=='Bundle loaded / Market prices are missing'
+    assert 'region refresh' in lua.eval('LC.renderRows[1].detail')
+    assert json.loads(lua.globals().LC.db.exportJSON)['loaded_bundle']=='2026-11-08T14:12:58+00:00'
+    lua.execute("LC.data.opportunities={{expires_at=NOW-1}};LC:RefreshUI()")
+    assert lua.eval('LC.renderRows[1].title')=='Loaded route evidence expired'

@@ -222,3 +222,58 @@ def test_crafting_discovery_uses_prices_and_demand_without_inventing_unlocks(cli
     recipe['materials'][0]['alternatives']=[2008,2009];accept_snapshot(value)
     assert client.get('/api/addon/plan').json()['crafting_discovery'][0]['profit_copper'] is None
     assert client.get('/api/admin').json()['crafting']==[]  # Unlearned recipe is discovery, not a craftable queue.
+
+
+def test_bundle_distinguishes_missing_prices_from_missing_transport(client):
+    accept_snapshot(snapshot())
+    plan=client.get('/api/addon/plan').json()
+    assert plan['generated_at'] and plan['opportunities']==[]
+    info=plan['market_diagnostics']
+    assert info['state']=='prices_missing' and info['owned_markets']==1
+    assert 'Character captures and market prices are separate' in info['message']
+    assert 'region refresh' in info['action']
+    assert client.get('/api/admin').json()['market_diagnostics']['state']=='prices_missing'
+
+
+def test_readiness_distinguishes_fresh_filtered_stale_and_home_missing(client):
+    from server.ingest import save_snapshot
+    from server.market import parse_tsm
+    from server.diagnostics import market_readiness
+    from server.models import Settings
+    accept_snapshot(snapshot())
+    groups=markets('us');home=next(m for m in groups if m['connected_id'] in character_markets('us'))['representative']
+    others=[m['representative'] for m in groups if m['representative']!=home][:2]
+    config=Settings();stamp=db.now()
+    header='itemId,name,marketValue,minBuyout,historical,avgSalePrice,soldPerDay,updatedAt\n'
+    def add(scope,realm,when):
+        source='tsm:us:'+scope+':'+realm
+        save_snapshot(source,parse_tsm(header+'123,Test,100000,100000,100000,100000,2,'+when,'us',scope,realm,source,stamp))
+    add('region','',stamp)
+    for realm in others:add('realm',realm,stamp)
+    assert market_readiness(config,0)['state']=='home_prices_missing'
+    add('realm',home,stamp)
+    assert market_readiness(config,0)['state']=='no_matches'
+    assert market_readiness(config,1)['state']=='ready'
+    assert market_readiness(config,0,True)['scanning'] is True
+    assert 'running' in market_readiness(config,0,True)['action']
+    with db.connect() as conn:conn.execute("UPDATE observations SET observed_at='2000-01-01T00:00:00+00:00'")
+    assert market_readiness(config,0)['state']=='prices_stale'
+    config.tsm_enabled=False
+    assert market_readiness(config,0)['state']=='pricing_disabled'
+
+
+def test_identical_bundle_not_republished_and_loaded_identity_acknowledged(client,tmp_path):
+    root=tmp_path/'Retail';root.mkdir();(root/'Wow.exe').touch()
+    config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
+    with patch('server.companion.game_state',return_value='closed'):install_addons(str(root))
+    worker=Companion();worker.plan_provider=lambda:dict(origin='live',schema_version=2,generated_at=db.now(),generated_epoch=int(time.time()),opportunities=[])
+    worker.tick();target=root/'Interface'/'AddOns'/'LazyCrawler_Data'/'Data.lua'
+    published=worker.status()['published_bundle'];first=target.read_bytes();mtime=target.stat().st_mtime_ns
+    value=snapshot();value['loaded_bundle']=published;accept_snapshot(value)
+    worker.tick()
+    assert target.read_bytes()==first and target.stat().st_mtime_ns==mtime
+    assert worker.status()['loaded_bundle']['generated_at']==published
+    assert 'acknowledged' in worker.state
+    target.write_text('manually replaced')
+    db.put('config_revision','changed');worker.tick()
+    assert 'LazyCrawlerData = ' in target.read_text()  # A changed/deleted file must be repaired despite identical semantic data.

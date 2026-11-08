@@ -1,6 +1,6 @@
 local addonName, LC = ...
 _G.LazyCrawler = LC
-LC.version = "0.3.0"
+LC.version = "0.3.1"
 LC.events = {}
 LC.dirty = false
 LC.errors = {}
@@ -97,7 +97,7 @@ function LC:Export()
     if self.CheckpointSession then self:CheckpointSession() end
     if self.db.activity then tasks[#tasks+1]=self.db.activity end
     local payload={schema_version=2,account_id=self.db.accountID,addon_version=self.version,
-        characters=self.db.characters,warbank=self.db.warbank,warbank_group=self.db.warbankGroup,lumber=self.db.lumber,
+        loaded_bundle=self.data and self.data.generated_at,characters=self.db.characters,warbank=self.db.warbank,warbank_group=self.db.warbankGroup,lumber=self.db.lumber,
         integrations=self:IntegrationStatus(),tasks=tasks}
     self.db.exportJSON=self:JSON(payload)
     self.db.exportedAt=time()

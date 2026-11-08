@@ -20,6 +20,7 @@ from .companion import Companion,install_addons
 from .snapshots import Snapshot,accept_snapshot
 from .admin import live_view,live_crafting
 from .crafting_market import discovery
+from .diagnostics import market_readiness
 from .access import SelfHostedAccess
 
 scanner = Scanner()
@@ -57,7 +58,7 @@ async def lifespan(app):
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-app = FastAPI(title='WowLazyCrawler', version='0.3.0', lifespan=lifespan, docs_url=None, redoc_url=None)
+app = FastAPI(title='WowLazyCrawler', version='0.3.1', lifespan=lifespan, docs_url=None, redoc_url=None)
 
 
 @app.middleware('http')
@@ -86,7 +87,7 @@ async def security(request: Request, call_next):
 def health():
     with db.connect() as conn:
         conn.execute('SELECT 1')
-    return {'status':'ok','version':'0.3.0'}
+    return {'status':'ok','version':'0.3.1'}
 
 
 @app.post('/api/login')
@@ -146,7 +147,7 @@ def status():
         for line in Path('/proc/self/status').read_text().splitlines():
             if line.startswith('VmRSS:'):
                 memory = int(line.split()[1])*1024
-    return dict(version='0.3.0',database='connected',schema=version,observations=count,
+    return dict(version='0.3.1',database='connected',schema=version,observations=count,
                 data_bytes=files,disk_free=disk.free,memory_bytes=memory,uptime_seconds=int(time.time()-STARTED),
                 worker='scanning' if scanner.task and not scanner.task.done() else 'idle',
                 tutorial_complete=db.get('tutorial_complete',False),next_scan=scanner.next_scan,sources=db.rows('SELECT s.*, MIN(o.observed_at) AS observed_at FROM sources s LEFT JOIN observations o ON o.source=s.id GROUP BY s.id ORDER BY s.id'),
@@ -291,6 +292,7 @@ def contract():
 def admin_view():
     config=Settings(**db.get('config',{}))
     result=live_view(config,live_trades)
+    result['market_diagnostics']=market_readiness(config,len(result['trades']),bool(scanner.task and not scanner.task.done()))
     result['service']=status()
     result['companion']=companion.status()
     result['catalog']=db.get('catalog_provenance',{})
@@ -308,14 +310,19 @@ def receive_snapshot(payload:Snapshot):
 def addon_plan():
     config=Settings(**db.get('config',{}))
     # This endpoint deliberately never uses the presentation/demo view.
+    trades=live_trades()
     return dict(schema_version=2,origin='live',generated_at=db.now(),generated_epoch=int(time.time()),region=config.region,
-        opportunities=live_trades(),crafting=live_crafting(config),crafting_discovery=discovery(config),theme=config.theme,
+        opportunities=trades,crafting=live_crafting(config),crafting_discovery=discovery(config),theme=config.theme,
+        market_diagnostics=market_readiness(config,len(trades),bool(scanner.task and not scanner.task.done())),
         catalog=markets(config.region),limits=dict(budget_gold=config.budget_gold,max_item_gold=config.max_item_gold,min_roi=config.min_roi))
 
 
 @app.post('/api/companion/install')
 def install_companion():
-    try:return install_addons(Settings(**db.get('config',{})).wow_path)
+    try:
+        result=install_addons(Settings(**db.get('config',{})).wow_path)
+        companion.last_revision=None  # Installing replaces the data stub; publish a fresh bundle on the next tick.
+        return result
     except (ValueError,OSError) as exc:raise HTTPException(422,str(exc)) from None
 
 

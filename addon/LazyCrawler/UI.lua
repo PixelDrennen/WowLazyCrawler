@@ -237,8 +237,22 @@ function LC:RefreshUI()
         self:Tutorial()
         self:AddRow("Ready for a working session","Start Realm flip, Posting, or Craft available from Session. If market evidence is missing, Settings shows capture and synchronization issues.",action("Choose a mode",function() self.page="overview";self:RefreshUI() end))
     elseif page=="radar" then
-        if #(self.data.opportunities or {})==0 then self:AddRow("Waiting for the first market bundle","The server scans all unique auction houses. Character captures identify the home markets; no realm-selection list is needed.") end
-        for _,candidate in ipairs(self.data.opportunities or {}) do
+        local diagnostics=self.data.market_diagnostics
+        local candidates={};local expired=0
+        for _,candidate in ipairs(self.data.opportunities or {}) do if candidate.expires_at and candidate.expires_at<time() then expired=expired+1 else candidates[#candidates+1]=candidate end end
+        if not self.data.generated_at then
+            self:AddRow("No server bundle loaded","Companion publication and addon loading are separate. In desktop Addon connection, compare the published bundle with the bundle acknowledged by the addon. Enable both LazyCrawler addons, then /reload after publication.")
+        elseif #candidates==0 then
+            if expired>0 then self:AddRow("Loaded route evidence expired",expired.." routes are no longer fresh. Refresh prices in the desktop app, then load the newly published result with /reload.")
+            elseif diagnostics then
+                self:AddRow("Bundle loaded / "..diagnostics.title,diagnostics.message.."\n"..diagnostics.action)
+            else self:AddRow("Bundle loaded; no route candidates","This bundle contains zero routes and no market diagnostics. Update the desktop app, run a region refresh, then /reload once a new bundle is published.") end
+        end
+        if diagnostics then
+            self:AddRow("Market coverage / "..diagnostics.region:upper(),diagnostics.fresh_markets.." / "..diagnostics.total_markets.." markets with fresh prices; "..diagnostics.fresh_owned_markets.." / "..diagnostics.owned_markets.." character markets covered; "..diagnostics.fresh_regional_rows.." fresh regional-demand rows.")
+            for _,source in ipairs(diagnostics.source_errors or {}) do self:AddRow("Feed issue / "..source.id,tostring(source.error or "Unknown source error")) end
+        end
+        for _,candidate in ipairs(candidates) do
             local item=candidate
             self:AddRow(item.name.."  ·  +"..self:Gold(item.net_profit).." estimated",item.source_realm.." → "..item.destination_realm.."   |   "..tostring(item.roi).."% ROI. Base-item estimate; verify live variant and binding.",action("Review & queue",function() self:QueueCandidate(item) end))
         end
@@ -287,6 +301,7 @@ function LC:RefreshUI()
         end
     elseif page=="settings" then
         self:AddRow("Synchronization",self.data.generated_at and ("Loaded bundle "..self.data.generated_at) or "ISSUE: No server bundle. Publish data from Companion in the desktop app, then /reload.")
+        if self.data.market_diagnostics then local d=self.data.market_diagnostics;self:AddRow(d.title,d.message.."\n"..d.action) end
         for _,scope in ipairs({"bags","bank","mail","auctions"}) do local capture=char.storages[scope];if not capture then self:AddRow("Missing capture / "..scope,"Open this interface on this character. Wait for loading, then /reload to save and send the capture.") end end
         if not self.db.warbank then self:AddRow("Missing capture / warbank","Open a purchased warbank tab and allow its data to load. Unknown gold is never replaced by zero.") end
         self:AddRow("Color palette",self.db.settings.theme.." / neutral surfaces, rounded controls and adaptive height.",action("Change palette",function()

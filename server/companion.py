@@ -119,7 +119,11 @@ class Companion:
         self.plan_provider=None
 
     def status(self):
-        return dict(state=self.state,error=self.error,pending=self.pending,last_output=self.last_output,game_state=game_state(),last_sync=db.get('last_addon_sync'),protocol=2)
+        published=db.get('companion_bundle',{})
+        loaded=db.get('last_loaded_bundle')
+        return dict(state=self.state,error=self.error,pending=self.pending,last_output=self.last_output or published.get('published_at'),
+            published_bundle=published.get('generated_at'),loaded_bundle=loaded,
+            game_state=game_state(),last_sync=db.get('last_addon_sync'),protocol=2)
 
     async def loop(self):
         while True:
@@ -147,8 +151,14 @@ class Companion:
             self.last_read[str(path)]=digest
         # Only the separate data addon is replaced, atomically. WoW reads it on login or /reload.
         # SavedVariables and executable addon code are never written by this path.
-        revision=(db.get('last_addon_sync'),db.get('market_revision'),db.get('config_revision'))
-        if revision==self.last_revision:return
+        jobs=db.rows('SELECT id,status FROM jobs ORDER BY id DESC LIMIT 1')
+        revision=(db.get('last_addon_sync'),db.get('market_revision'),db.get('config_revision'),int(time.time()//300),tuple(jobs[0].values()) if jobs else None)
+        if revision==self.last_revision:
+            published=db.get('companion_bundle',{})
+            loaded=db.get('last_loaded_bundle',{})
+            if published.get('generated_at') and published.get('generated_at')!=loaded.get('generated_at'):self.state='bundle published — /reload to load'
+            else:self.state='watching exports — bundle acknowledged' if loaded else 'watching exports'
+            return
         self.pending=True
         target=root/'Interface'/'AddOns'/'LazyCrawler_Data'/'Data.lua'
         if not target.parent.is_dir():self.state='addon installation needed';return
@@ -156,6 +166,15 @@ class Companion:
         if self.plan_provider is None:return
         payload=self.plan_provider()
         if payload.get('origin')=='demo':raise ValueError('Demonstration data cannot be synchronized to WoW')
+        # Re-exporting the same captures must not create an endless new-bundle/reload cycle.
+        semantic={k:v for k,v in payload.items() if k not in ('generated_at','generated_epoch')}
+        digest=hashlib.sha256(json.dumps(semantic,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        published=db.get('companion_bundle',{})
+        if published.get('path')==str(target) and published.get('payload_digest')==digest and target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest()==published.get('file_digest'):
+            self.last_revision=revision;self.pending=False;self.last_output=published.get('published_at')
+            loaded=db.get('last_loaded_bundle',{})
+            self.state='watching exports — bundle acknowledged' if loaded.get('generated_at')==published.get('generated_at') else 'bundle published — /reload to load'
+            return
         content='-- Generated atomically by LazyCrawler. No gameplay code.\nLazyCrawlerData = '+lua_literal(payload)+'\n'
         fd,temp=tempfile.mkstemp(dir=target.parent,prefix='.lazycrawler-',suffix='.tmp')
         try:
@@ -163,4 +182,5 @@ class Companion:
             os.replace(temp,target)
         finally:
             if Path(temp).exists():Path(temp).unlink()
+        db.put('companion_bundle',dict(path=str(target),payload_digest=digest,file_digest=hashlib.sha256(content.encode()).hexdigest(),generated_at=payload.get('generated_at'),published_at=db.now()))
         self.last_revision=revision;self.last_output=db.now();self.pending=False;self.state='bundle ready — /reload in WoW' if game_state()=='running' else 'up to date'

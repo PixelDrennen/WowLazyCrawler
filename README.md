@@ -7,7 +7,7 @@ LazyCrawler is an **in-game economic workflow addon**, backed by a self-hosted m
 Download the `lazycrawler-linux-x64` artifact from a successful [Validate and package](https://github.com/PixelDrennen/WowLazyCrawler/actions) run and extract it:
 
 ```sh
-sudo dnf install ./wowlazycrawler-0.3.0.x86_64.rpm
+sudo dnf install ./wowlazycrawler-0.3.1.x86_64.rpm
 ```
 
 Open **WoW LazyCrawler** from Plasma's application menu. The backend and dashboard are bundled; no external browser, Python or Node installation is needed. AppImage is included as an alternative. Desktop shortcuts, source builds, headless service, migration, and recovery are covered in [installation](docs/installation.md).
@@ -38,6 +38,8 @@ The dashboard displays live observations only, including after upgrading an olde
 WoW addons cannot make arbitrary HTTP calls. This is an automatic file-based exchange with an explicit game-save boundary, not a false promise of live HTTP or live code injection. Only the separate data file can update while playing; installing executable addon files still requires WoW to be closed. SavedVariables are never written by the companion.
 
 ## In-game addon (early client-validation build)
+
+Market readiness is separate from file transport: Radar and the dashboard identify missing/stale regional prices, uncovered character markets, disabled pricing, feed errors, and valid zero-match results. Addon connection compares the published bundle with the last identity acknowledged by the addon. Unchanged captures do not publish an identical bundle with a new timestamp.
 
 The compact task window has a permanent character/warbank/mail gold header, rounded controls, native icon textures, neutral palettes and an overflow-only scrollbar. Start **Realm flip**, **Posting**, or **Craft available** sessions, with persistent elapsed time, pause/resume and stop controls. Time offline is excluded. Targets can change during a run: minimum stock defaults to 1, bulk acquisition to 3, and posting wallet to 500g. Bank actions move one stack per click; oversized withdrawals split into a free bag slot and wallet top-ups withdraw only the difference. Unavailable routes can be skipped.
 

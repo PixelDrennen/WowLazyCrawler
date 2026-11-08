@@ -71,7 +71,7 @@ async function start() {
       const result = await fetch(`http://127.0.0.1:${record.port}/api/health`, {
         signal: AbortSignal.timeout(1000),
       });
-      if (result.ok && (await result.json()).version === "0.3.0")
+      if (result.ok && (await result.json()).version === "0.3.1")
         existing = record;
     }
   } catch {}

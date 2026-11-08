@@ -44,3 +44,7 @@ Backend tests cover all-region catalog grouping and Gurubashi connections; chara
 New Lua tests exercise pause/resume and restart timing, exclusion of offline time, timer-free discovery, observed-stock/gold phase gates, partial-stack withdrawals, 500g wallet top-up arithmetic, paused action rejection, stale CraftSim rejection, minimum-stock planning, unavailable bank-money/mail-header preservation, compact-window bounds, conditional scrollbar visibility and full-result-only undercut checks excluding owned listings. Backend tests cover live-only defaults and legacy demo settings, running-client data publication with executable-install rejection, and real-price crafting discovery with unresolved reagent quality left unknown.
 
 Native WoW visual rendering, protected bank actions, the user's installed TSM/CraftSim versions and Fedora KDE installation remain manual acceptance checks. Automated Lua frames are mocks, not an in-game screenshot or certification.
+
+## 0.3.1 market readiness and bundle acknowledgement
+
+Regression tests separate a loaded empty bundle from missing transport, distinguish missing/stale prices and uncovered character markets from filtered zero matches, preserve feed errors and refresh guidance, and verify that unchanged captures do not rewrite the data file. The addon exports its loaded bundle identity; the desktop distinguishes publication from an acknowledgement saved by the client. Changed data files are repaired even when the semantic planning payload is unchanged. Expired routes are hidden from actionable Radar results.
