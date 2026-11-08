@@ -7,7 +7,7 @@ from . import db
 def seed_catalog():
     path=Path(__file__).parent/'data'/'realms.json'
     if not path.exists():
-        return
+        raise RuntimeError("Bundled realm catalog is missing; reinstall a complete LazyCrawler build")
     data=json.loads(path.read_text())
     with db.connect() as conn:
         conn.executemany('INSERT OR IGNORE INTO realms VALUES(?,?,?,?)',

@@ -21,12 +21,14 @@ function LC:Call(fn, ...)
     if type(fn) ~= "function" then return nil end
     local ok, result = pcall(fn, ...)
     if ok then return result end
+    self.errors["API call"]=tostring(result)
     return nil
 end
 function LC:On(event, fn)
     self.events[event] = self.events[event] or {}
     table.insert(self.events[event], fn)
-    pcall(self.frame.RegisterEvent, self.frame, event)
+    local ok,err=pcall(self.frame.RegisterEvent, self.frame, event)
+    if not ok then self.errors["Event "..event]=tostring(err) end
 end
 function LC:Changed()
     self.dirty = true

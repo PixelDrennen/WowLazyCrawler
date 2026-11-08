@@ -1,0 +1,3358 @@
+{
+  "provenance": {
+    "source": "TSM public realm metadata",
+    "url": "https://tradeskillmaster.com/public-data",
+    "observed_at": "2026-11-08T11:55:00.097274+00:00",
+    "kind": "bundled snapshot; automatically refreshed"
+  },
+  "realms": [
+    {
+      "region": "us",
+      "slug": "winterhoof",
+      "name": "Winterhoof",
+      "connected_id": -1
+    },
+    {
+      "region": "us",
+      "slug": "kilrogg",
+      "name": "Kilrogg",
+      "connected_id": -1
+    },
+    {
+      "region": "us",
+      "slug": "proudmoore",
+      "name": "Proudmoore",
+      "connected_id": -2
+    },
+    {
+      "region": "us",
+      "slug": "thorium-brotherhood",
+      "name": "Thorium Brotherhood",
+      "connected_id": -5
+    },
+    {
+      "region": "us",
+      "slug": "farstriders",
+      "name": "Farstriders",
+      "connected_id": -5
+    },
+    {
+      "region": "us",
+      "slug": "silver-hand",
+      "name": "Silver Hand",
+      "connected_id": -5
+    },
+    {
+      "region": "us",
+      "slug": "eitrigg",
+      "name": "Eitrigg",
+      "connected_id": -6
+    },
+    {
+      "region": "us",
+      "slug": "shuhalo",
+      "name": "Shu'halo",
+      "connected_id": -6
+    },
+    {
+      "region": "us",
+      "slug": "alleria",
+      "name": "Alleria",
+      "connected_id": -7
+    },
+    {
+      "region": "us",
+      "slug": "khadgar",
+      "name": "Khadgar",
+      "connected_id": -7
+    },
+    {
+      "region": "us",
+      "slug": "exodar",
+      "name": "Exodar",
+      "connected_id": -7
+    },
+    {
+      "region": "us",
+      "slug": "medivh",
+      "name": "Medivh",
+      "connected_id": -7
+    },
+    {
+      "region": "us",
+      "slug": "spinebreaker",
+      "name": "Spinebreaker",
+      "connected_id": -8
+    },
+    {
+      "region": "us",
+      "slug": "gorefiend",
+      "name": "Gorefiend",
+      "connected_id": -8
+    },
+    {
+      "region": "us",
+      "slug": "eredar",
+      "name": "Eredar",
+      "connected_id": -8
+    },
+    {
+      "region": "us",
+      "slug": "wildhammer",
+      "name": "Wildhammer",
+      "connected_id": -8
+    },
+    {
+      "region": "us",
+      "slug": "zangarmarsh",
+      "name": "Zangarmarsh",
+      "connected_id": -8
+    },
+    {
+      "region": "us",
+      "slug": "hellscream",
+      "name": "Hellscream",
+      "connected_id": -8
+    },
+    {
+      "region": "us",
+      "slug": "blackhand",
+      "name": "Blackhand",
+      "connected_id": -9
+    },
+    {
+      "region": "us",
+      "slug": "galakrond",
+      "name": "Galakrond",
+      "connected_id": -9
+    },
+    {
+      "region": "us",
+      "slug": "dentarg",
+      "name": "Dentarg",
+      "connected_id": -10
+    },
+    {
+      "region": "us",
+      "slug": "whisperwind",
+      "name": "Whisperwind",
+      "connected_id": -10
+    },
+    {
+      "region": "us",
+      "slug": "illidan",
+      "name": "Illidan",
+      "connected_id": -11
+    },
+    {
+      "region": "us",
+      "slug": "stormreaver",
+      "name": "Stormreaver",
+      "connected_id": -12
+    },
+    {
+      "region": "us",
+      "slug": "stormrage",
+      "name": "Stormrage",
+      "connected_id": -13
+    },
+    {
+      "region": "us",
+      "slug": "zuljin",
+      "name": "Zul'jin",
+      "connected_id": -14
+    },
+    {
+      "region": "us",
+      "slug": "durotan",
+      "name": "Durotan",
+      "connected_id": -15
+    },
+    {
+      "region": "us",
+      "slug": "ysera",
+      "name": "Ysera",
+      "connected_id": -15
+    },
+    {
+      "region": "us",
+      "slug": "bloodhoof",
+      "name": "Bloodhoof",
+      "connected_id": -16
+    },
+    {
+      "region": "us",
+      "slug": "duskwood",
+      "name": "Duskwood",
+      "connected_id": -16
+    },
+    {
+      "region": "us",
+      "slug": "elune",
+      "name": "Elune",
+      "connected_id": -17
+    },
+    {
+      "region": "us",
+      "slug": "gilneas",
+      "name": "Gilneas",
+      "connected_id": -17
+    },
+    {
+      "region": "us",
+      "slug": "chogall",
+      "name": "Cho'gall",
+      "connected_id": -17
+    },
+    {
+      "region": "us",
+      "slug": "auchindoun",
+      "name": "Auchindoun",
+      "connected_id": -17
+    },
+    {
+      "region": "us",
+      "slug": "laughing-skull",
+      "name": "Laughing Skull",
+      "connected_id": -17
+    },
+    {
+      "region": "us",
+      "slug": "arthas",
+      "name": "Arthas",
+      "connected_id": -18
+    },
+    {
+      "region": "us",
+      "slug": "warsong",
+      "name": "Warsong",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "gorgonnash",
+      "name": "Gorgonnash",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "balnazzar",
+      "name": "Balnazzar",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "anvilmar",
+      "name": "Anvilmar",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "alterac-mountains",
+      "name": "Alterac Mountains",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "undermine",
+      "name": "Undermine",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "the-forgotten-coast",
+      "name": "The Forgotten Coast",
+      "connected_id": -19
+    },
+    {
+      "region": "us",
+      "slug": "bleeding-hollow",
+      "name": "Bleeding Hollow",
+      "connected_id": -20
+    },
+    {
+      "region": "us",
+      "slug": "argent-dawn",
+      "name": "Argent Dawn",
+      "connected_id": -21
+    },
+    {
+      "region": "us",
+      "slug": "the-scryers",
+      "name": "The Scryers",
+      "connected_id": -21
+    },
+    {
+      "region": "us",
+      "slug": "sargeras",
+      "name": "Sargeras",
+      "connected_id": -22
+    },
+    {
+      "region": "us",
+      "slug": "azgalor",
+      "name": "Azgalor",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "mannoroth",
+      "name": "Mannoroth",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "destromath",
+      "name": "Destromath",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "azshara",
+      "name": "Azshara",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "nazjatar",
+      "name": "Nazjatar",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "blood-furnace",
+      "name": "Blood Furnace",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "thunderlord",
+      "name": "Thunderlord",
+      "connected_id": -23
+    },
+    {
+      "region": "us",
+      "slug": "anetheron",
+      "name": "Anetheron",
+      "connected_id": -24
+    },
+    {
+      "region": "us",
+      "slug": "ysondre",
+      "name": "Ysondre",
+      "connected_id": -24
+    },
+    {
+      "region": "us",
+      "slug": "altar-of-storms",
+      "name": "Altar of Storms",
+      "connected_id": -24
+    },
+    {
+      "region": "us",
+      "slug": "magtheridon",
+      "name": "Magtheridon",
+      "connected_id": -24
+    },
+    {
+      "region": "us",
+      "slug": "dragonmaw",
+      "name": "Dragonmaw",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "uldum",
+      "name": "Uldum",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "eldrethalas",
+      "name": "Eldre'Thalas",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "akama",
+      "name": "Akama",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "mugthol",
+      "name": "Mug'thol",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "korialstrasz",
+      "name": "Korialstrasz",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "antonidas",
+      "name": "Antonidas",
+      "connected_id": -25
+    },
+    {
+      "region": "us",
+      "slug": "silvermoon",
+      "name": "Silvermoon",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "shadowsong",
+      "name": "Shadowsong",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "terenas",
+      "name": "Terenas",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "skywall",
+      "name": "Skywall",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "hydraxis",
+      "name": "Hydraxis",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "borean-tundra",
+      "name": "Borean Tundra",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "moknathal",
+      "name": "Mok'Nathal",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "drakthul",
+      "name": "Drak'thul",
+      "connected_id": -26
+    },
+    {
+      "region": "us",
+      "slug": "eonar",
+      "name": "Eonar",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "ursin",
+      "name": "Ursin",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "guldan",
+      "name": "Gul'dan",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "zuluhed",
+      "name": "Zuluhed",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "scilla",
+      "name": "Scilla",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "andorhal",
+      "name": "Andorhal",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "velen",
+      "name": "Velen",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "skullcrusher",
+      "name": "Skullcrusher",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "black-dragonflight",
+      "name": "Black Dragonflight",
+      "connected_id": -27
+    },
+    {
+      "region": "us",
+      "slug": "llane",
+      "name": "Llane",
+      "connected_id": -28
+    },
+    {
+      "region": "us",
+      "slug": "arygos",
+      "name": "Arygos",
+      "connected_id": -28
+    },
+    {
+      "region": "us",
+      "slug": "earthen-ring",
+      "name": "Earthen Ring",
+      "connected_id": -29
+    },
+    {
+      "region": "us",
+      "slug": "malygos",
+      "name": "Malygos",
+      "connected_id": -30
+    },
+    {
+      "region": "us",
+      "slug": "icecrown",
+      "name": "Icecrown",
+      "connected_id": -30
+    },
+    {
+      "region": "us",
+      "slug": "garona",
+      "name": "Garona",
+      "connected_id": -30
+    },
+    {
+      "region": "us",
+      "slug": "burning-blade",
+      "name": "Burning Blade",
+      "connected_id": -30
+    },
+    {
+      "region": "us",
+      "slug": "onyxia",
+      "name": "Onyxia",
+      "connected_id": -30
+    },
+    {
+      "region": "us",
+      "slug": "lightnings-blade",
+      "name": "Lightning's Blade",
+      "connected_id": -30
+    },
+    {
+      "region": "us",
+      "slug": "aggramar",
+      "name": "Aggramar",
+      "connected_id": -31
+    },
+    {
+      "region": "us",
+      "slug": "fizzcrank",
+      "name": "Fizzcrank",
+      "connected_id": -31
+    },
+    {
+      "region": "us",
+      "slug": "suramar",
+      "name": "Suramar",
+      "connected_id": -32
+    },
+    {
+      "region": "us",
+      "slug": "windrunner",
+      "name": "Windrunner",
+      "connected_id": -32
+    },
+    {
+      "region": "us",
+      "slug": "draka",
+      "name": "Draka",
+      "connected_id": -32
+    },
+    {
+      "region": "us",
+      "slug": "darrowmere",
+      "name": "Darrowmere",
+      "connected_id": -32
+    },
+    {
+      "region": "us",
+      "slug": "dragonblight",
+      "name": "Dragonblight",
+      "connected_id": -33
+    },
+    {
+      "region": "us",
+      "slug": "fenris",
+      "name": "Fenris",
+      "connected_id": -33
+    },
+    {
+      "region": "us",
+      "slug": "bronzebeard",
+      "name": "Bronzebeard",
+      "connected_id": -35
+    },
+    {
+      "region": "us",
+      "slug": "shandris",
+      "name": "Shandris",
+      "connected_id": -35
+    },
+    {
+      "region": "us",
+      "slug": "feathermoon",
+      "name": "Feathermoon",
+      "connected_id": -36
+    },
+    {
+      "region": "us",
+      "slug": "scarlet-crusade",
+      "name": "Scarlet Crusade",
+      "connected_id": -36
+    },
+    {
+      "region": "us",
+      "slug": "darkspear",
+      "name": "Darkspear",
+      "connected_id": -37
+    },
+    {
+      "region": "us",
+      "slug": "blackrock",
+      "name": "Blackrock",
+      "connected_id": -38
+    },
+    {
+      "region": "us",
+      "slug": "khaz-modan",
+      "name": "Khaz Modan",
+      "connected_id": -38
+    },
+    {
+      "region": "us",
+      "slug": "muradin",
+      "name": "Muradin",
+      "connected_id": -38
+    },
+    {
+      "region": "us",
+      "slug": "nordrassil",
+      "name": "Nordrassil",
+      "connected_id": -38
+    },
+    {
+      "region": "us",
+      "slug": "azjolnerub",
+      "name": "Azjol-Nerub",
+      "connected_id": -38
+    },
+    {
+      "region": "us",
+      "slug": "shadow-council",
+      "name": "Shadow Council",
+      "connected_id": -39
+    },
+    {
+      "region": "us",
+      "slug": "cenarion-circle",
+      "name": "Cenarion Circle",
+      "connected_id": -39
+    },
+    {
+      "region": "us",
+      "slug": "blackwater-raiders",
+      "name": "Blackwater Raiders",
+      "connected_id": -39
+    },
+    {
+      "region": "us",
+      "slug": "sisters-of-elune",
+      "name": "Sisters of Elune",
+      "connected_id": -39
+    },
+    {
+      "region": "us",
+      "slug": "stormscale",
+      "name": "Stormscale",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "spirestone",
+      "name": "Spirestone",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "malorne",
+      "name": "Malorne",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "vashj",
+      "name": "Vashj",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "rivendare",
+      "name": "Rivendare",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "draktharon",
+      "name": "Drak'Tharon",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "firetree",
+      "name": "Firetree",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "frostwolf",
+      "name": "Frostwolf",
+      "connected_id": -40
+    },
+    {
+      "region": "us",
+      "slug": "runetotem",
+      "name": "Runetotem",
+      "connected_id": -41
+    },
+    {
+      "region": "us",
+      "slug": "uther",
+      "name": "Uther",
+      "connected_id": -41
+    },
+    {
+      "region": "us",
+      "slug": "detheroc",
+      "name": "Detheroc",
+      "connected_id": -42
+    },
+    {
+      "region": "us",
+      "slug": "shadowmoon",
+      "name": "Shadowmoon",
+      "connected_id": -42
+    },
+    {
+      "region": "us",
+      "slug": "haomarush",
+      "name": "Haomarush",
+      "connected_id": -42
+    },
+    {
+      "region": "us",
+      "slug": "lethon",
+      "name": "Lethon",
+      "connected_id": -42
+    },
+    {
+      "region": "us",
+      "slug": "blackwing-lair",
+      "name": "Blackwing Lair",
+      "connected_id": -42
+    },
+    {
+      "region": "us",
+      "slug": "dethecus",
+      "name": "Dethecus",
+      "connected_id": -42
+    },
+    {
+      "region": "us",
+      "slug": "kalecgos",
+      "name": "Kalecgos",
+      "connected_id": -43
+    },
+    {
+      "region": "us",
+      "slug": "deathwing",
+      "name": "Deathwing",
+      "connected_id": -43
+    },
+    {
+      "region": "us",
+      "slug": "executus",
+      "name": "Executus",
+      "connected_id": -43
+    },
+    {
+      "region": "us",
+      "slug": "shattered-halls",
+      "name": "Shattered Halls",
+      "connected_id": -43
+    },
+    {
+      "region": "us",
+      "slug": "shattered-hand",
+      "name": "Shattered Hand",
+      "connected_id": -44
+    },
+    {
+      "region": "us",
+      "slug": "dalvengyr",
+      "name": "Dalvengyr",
+      "connected_id": -44
+    },
+    {
+      "region": "us",
+      "slug": "demon-soul",
+      "name": "Demon Soul",
+      "connected_id": -44
+    },
+    {
+      "region": "us",
+      "slug": "coilfang",
+      "name": "Coilfang",
+      "connected_id": -44
+    },
+    {
+      "region": "us",
+      "slug": "dark-iron",
+      "name": "Dark Iron",
+      "connected_id": -44
+    },
+    {
+      "region": "us",
+      "slug": "tanaris",
+      "name": "Tanaris",
+      "connected_id": -45
+    },
+    {
+      "region": "us",
+      "slug": "greymane",
+      "name": "Greymane",
+      "connected_id": -45
+    },
+    {
+      "region": "us",
+      "slug": "staghelm",
+      "name": "Staghelm",
+      "connected_id": -46
+    },
+    {
+      "region": "us",
+      "slug": "madoran",
+      "name": "Madoran",
+      "connected_id": -46
+    },
+    {
+      "region": "us",
+      "slug": "azuremyst",
+      "name": "Azuremyst",
+      "connected_id": -46
+    },
+    {
+      "region": "us",
+      "slug": "dawnbringer",
+      "name": "Dawnbringer",
+      "connected_id": -46
+    },
+    {
+      "region": "us",
+      "slug": "emerald-dream",
+      "name": "Emerald Dream",
+      "connected_id": -47
+    },
+    {
+      "region": "us",
+      "slug": "maelstrom",
+      "name": "Maelstrom",
+      "connected_id": -48
+    },
+    {
+      "region": "us",
+      "slug": "twisting-nether",
+      "name": "Twisting Nether",
+      "connected_id": -48
+    },
+    {
+      "region": "us",
+      "slug": "lightninghoof",
+      "name": "Lightninghoof",
+      "connected_id": -48
+    },
+    {
+      "region": "us",
+      "slug": "the-venture-co",
+      "name": "The Venture Co",
+      "connected_id": -48
+    },
+    {
+      "region": "us",
+      "slug": "ravenholdt",
+      "name": "Ravenholdt",
+      "connected_id": -48
+    },
+    {
+      "region": "us",
+      "slug": "alexstrasza",
+      "name": "Alexstrasza",
+      "connected_id": -49
+    },
+    {
+      "region": "us",
+      "slug": "terokkar",
+      "name": "Terokkar",
+      "connected_id": -49
+    },
+    {
+      "region": "us",
+      "slug": "kirin-tor",
+      "name": "Kirin Tor",
+      "connected_id": -50
+    },
+    {
+      "region": "us",
+      "slug": "sentinels",
+      "name": "Sentinels",
+      "connected_id": -50
+    },
+    {
+      "region": "us",
+      "slug": "steamwheedle-cartel",
+      "name": "Steamwheedle Cartel",
+      "connected_id": -50
+    },
+    {
+      "region": "us",
+      "slug": "ravencrest",
+      "name": "Ravencrest",
+      "connected_id": -51
+    },
+    {
+      "region": "us",
+      "slug": "uldaman",
+      "name": "Uldaman",
+      "connected_id": -51
+    },
+    {
+      "region": "us",
+      "slug": "archimonde",
+      "name": "Archimonde",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "kargath",
+      "name": "Kargath",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "burning-legion",
+      "name": "Burning Legion",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "thunderhorn",
+      "name": "Thunderhorn",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "norgannon",
+      "name": "Norgannon",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "jaedenar",
+      "name": "Jaedenar",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "the-underbog",
+      "name": "The Underbog",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "agamaggan",
+      "name": "Agamaggan",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "blades-edge",
+      "name": "Blade's Edge",
+      "connected_id": -52
+    },
+    {
+      "region": "us",
+      "slug": "aegwynn",
+      "name": "Aegwynn",
+      "connected_id": -53
+    },
+    {
+      "region": "us",
+      "slug": "bonechewer",
+      "name": "Bonechewer",
+      "connected_id": -53
+    },
+    {
+      "region": "us",
+      "slug": "gurubashi",
+      "name": "Gurubashi",
+      "connected_id": -53
+    },
+    {
+      "region": "us",
+      "slug": "hakkar",
+      "name": "Hakkar",
+      "connected_id": -53
+    },
+    {
+      "region": "us",
+      "slug": "garrosh",
+      "name": "Garrosh",
+      "connected_id": -53
+    },
+    {
+      "region": "us",
+      "slug": "daggerspine",
+      "name": "Daggerspine",
+      "connected_id": -53
+    },
+    {
+      "region": "us",
+      "slug": "chromaggus",
+      "name": "Chromaggus",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "nathrezim",
+      "name": "Nathrezim",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "garithos",
+      "name": "Garithos",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "arathor",
+      "name": "Arathor",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "anubarak",
+      "name": "Anub'arak",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "drenden",
+      "name": "Drenden",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "smolderthorn",
+      "name": "Smolderthorn",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "crushridge",
+      "name": "Crushridge",
+      "connected_id": -54
+    },
+    {
+      "region": "us",
+      "slug": "kul-tiras",
+      "name": "Kul Tiras",
+      "connected_id": -55
+    },
+    {
+      "region": "us",
+      "slug": "bladefist",
+      "name": "Bladefist",
+      "connected_id": -55
+    },
+    {
+      "region": "us",
+      "slug": "rexxar",
+      "name": "Rexxar",
+      "connected_id": -56
+    },
+    {
+      "region": "us",
+      "slug": "misha",
+      "name": "Misha",
+      "connected_id": -56
+    },
+    {
+      "region": "us",
+      "slug": "cenarius",
+      "name": "Cenarius",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "nerzhul",
+      "name": "Ner'zhul",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "perenolde",
+      "name": "Perenolde",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "korgath",
+      "name": "Korgath",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "tortheldrin",
+      "name": "Tortheldrin",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "cairne",
+      "name": "Cairne",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "frostmane",
+      "name": "Frostmane",
+      "connected_id": -57
+    },
+    {
+      "region": "us",
+      "slug": "lothar",
+      "name": "Lothar",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "moonrunner",
+      "name": "Moonrunner",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "malfurion",
+      "name": "Malfurion",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "gnomeregan",
+      "name": "Gnomeregan",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "ghostlands",
+      "name": "Ghostlands",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "grizzly-hills",
+      "name": "Grizzly Hills",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "trollbane",
+      "name": "Trollbane",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "kaelthas",
+      "name": "Kael'thas",
+      "connected_id": -59
+    },
+    {
+      "region": "us",
+      "slug": "veknilash",
+      "name": "Vek'nilash",
+      "connected_id": -60
+    },
+    {
+      "region": "us",
+      "slug": "nazgrel",
+      "name": "Nazgrel",
+      "connected_id": -60
+    },
+    {
+      "region": "us",
+      "slug": "nesingwary",
+      "name": "Nesingwary",
+      "connected_id": -60
+    },
+    {
+      "region": "us",
+      "slug": "stonemaul",
+      "name": "Stonemaul",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "dunemaul",
+      "name": "Dunemaul",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "bloodscalp",
+      "name": "Bloodscalp",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "maiev",
+      "name": "Maiev",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "queldorei",
+      "name": "Quel'dorei",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "senjin",
+      "name": "Sen'jin",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "boulderfist",
+      "name": "Boulderfist",
+      "connected_id": -61
+    },
+    {
+      "region": "us",
+      "slug": "doomhammer",
+      "name": "Doomhammer",
+      "connected_id": -62
+    },
+    {
+      "region": "us",
+      "slug": "baelgun",
+      "name": "Baelgun",
+      "connected_id": -62
+    },
+    {
+      "region": "us",
+      "slug": "drakkari",
+      "name": "Drakkari",
+      "connected_id": -63
+    },
+    {
+      "region": "us",
+      "slug": "aerie-peak",
+      "name": "Aerie Peak",
+      "connected_id": -64
+    },
+    {
+      "region": "us",
+      "slug": "ragnaros",
+      "name": "Ragnaros",
+      "connected_id": -65
+    },
+    {
+      "region": "us",
+      "slug": "quelthalas",
+      "name": "Quel'Thalas",
+      "connected_id": -66
+    },
+    {
+      "region": "us",
+      "slug": "goldrinn",
+      "name": "Goldrinn",
+      "connected_id": -67
+    },
+    {
+      "region": "us",
+      "slug": "nemesis",
+      "name": "Nemesis",
+      "connected_id": -68
+    },
+    {
+      "region": "us",
+      "slug": "tol-barad",
+      "name": "Tol Barad",
+      "connected_id": -68
+    },
+    {
+      "region": "us",
+      "slug": "azralon",
+      "name": "Azralon",
+      "connected_id": -69
+    },
+    {
+      "region": "us",
+      "slug": "gallywix",
+      "name": "Gallywix",
+      "connected_id": -70
+    },
+    {
+      "region": "us",
+      "slug": "hyjal",
+      "name": "Hyjal",
+      "connected_id": -71
+    },
+    {
+      "region": "us",
+      "slug": "area-52",
+      "name": "Area 52",
+      "connected_id": -73
+    },
+    {
+      "region": "us",
+      "slug": "thrall",
+      "name": "Thrall",
+      "connected_id": -74
+    },
+    {
+      "region": "us",
+      "slug": "dalaran",
+      "name": "Dalaran",
+      "connected_id": -75
+    },
+    {
+      "region": "us",
+      "slug": "malganis",
+      "name": "Mal'Ganis",
+      "connected_id": -76
+    },
+    {
+      "region": "us",
+      "slug": "turalyon",
+      "name": "Turalyon",
+      "connected_id": -77
+    },
+    {
+      "region": "us",
+      "slug": "kelthuzad",
+      "name": "Kel'Thuzad",
+      "connected_id": -78
+    },
+    {
+      "region": "us",
+      "slug": "caelestrasz",
+      "name": "Caelestrasz",
+      "connected_id": -80
+    },
+    {
+      "region": "us",
+      "slug": "nagrand",
+      "name": "Nagrand",
+      "connected_id": -80
+    },
+    {
+      "region": "us",
+      "slug": "saurfang",
+      "name": "Saurfang",
+      "connected_id": -80
+    },
+    {
+      "region": "us",
+      "slug": "barthilas",
+      "name": "Barthilas",
+      "connected_id": -81
+    },
+    {
+      "region": "us",
+      "slug": "frostmourne",
+      "name": "Frostmourne",
+      "connected_id": -82
+    },
+    {
+      "region": "us",
+      "slug": "thaurissan",
+      "name": "Thaurissan",
+      "connected_id": -82
+    },
+    {
+      "region": "us",
+      "slug": "dreadmaul",
+      "name": "Dreadmaul",
+      "connected_id": -82
+    },
+    {
+      "region": "us",
+      "slug": "gundrak",
+      "name": "Gundrak",
+      "connected_id": -82
+    },
+    {
+      "region": "us",
+      "slug": "jubeithos",
+      "name": "Jubei'Thos",
+      "connected_id": -82
+    },
+    {
+      "region": "us",
+      "slug": "khazgoroth",
+      "name": "Khaz'goroth",
+      "connected_id": -83
+    },
+    {
+      "region": "us",
+      "slug": "amanthul",
+      "name": "Aman'Thul",
+      "connected_id": -83
+    },
+    {
+      "region": "us",
+      "slug": "dathremar",
+      "name": "Dath'Remar",
+      "connected_id": -83
+    },
+    {
+      "region": "us",
+      "slug": "draenor",
+      "name": "Draenor",
+      "connected_id": -34
+    },
+    {
+      "region": "us",
+      "slug": "echo-isles",
+      "name": "Echo Isles",
+      "connected_id": -34
+    },
+    {
+      "region": "us",
+      "slug": "wyrmrest-accord",
+      "name": "Wyrmrest Accord",
+      "connected_id": -58
+    },
+    {
+      "region": "us",
+      "slug": "tichondrius",
+      "name": "Tichondrius",
+      "connected_id": -4
+    },
+    {
+      "region": "us",
+      "slug": "kiljaeden",
+      "name": "Kil'jaeden",
+      "connected_id": -3
+    },
+    {
+      "region": "us",
+      "slug": "moon-guard",
+      "name": "Moon Guard",
+      "connected_id": -72
+    },
+    {
+      "region": "us",
+      "slug": "lightbringer",
+      "name": "Lightbringer",
+      "connected_id": -79
+    },
+    {
+      "region": "eu",
+      "slug": "garona",
+      "name": "Garona",
+      "connected_id": -84
+    },
+    {
+      "region": "eu",
+      "slug": "nerzhul",
+      "name": "Ner'zhul",
+      "connected_id": -84
+    },
+    {
+      "region": "eu",
+      "slug": "sargeras",
+      "name": "Sargeras",
+      "connected_id": -84
+    },
+    {
+      "region": "eu",
+      "slug": "voljin",
+      "name": "Vol'jin",
+      "connected_id": -85
+    },
+    {
+      "region": "eu",
+      "slug": "chants-éternels",
+      "name": "Chants éternels",
+      "connected_id": -85
+    },
+    {
+      "region": "eu",
+      "slug": "arakarahm",
+      "name": "Arak-arahm",
+      "connected_id": -86
+    },
+    {
+      "region": "eu",
+      "slug": "kaelthas",
+      "name": "Kael'thas",
+      "connected_id": -86
+    },
+    {
+      "region": "eu",
+      "slug": "rashgarroth",
+      "name": "Rashgarroth",
+      "connected_id": -86
+    },
+    {
+      "region": "eu",
+      "slug": "throkferoth",
+      "name": "Throk'Feroth",
+      "connected_id": -86
+    },
+    {
+      "region": "eu",
+      "slug": "dethecus",
+      "name": "Dethecus",
+      "connected_id": -87
+    },
+    {
+      "region": "eu",
+      "slug": "theradras",
+      "name": "Theradras",
+      "connected_id": -87
+    },
+    {
+      "region": "eu",
+      "slug": "onyxia",
+      "name": "Onyxia",
+      "connected_id": -87
+    },
+    {
+      "region": "eu",
+      "slug": "mugthol",
+      "name": "Mug'thol",
+      "connected_id": -87
+    },
+    {
+      "region": "eu",
+      "slug": "terrordar",
+      "name": "Terrordar",
+      "connected_id": -87
+    },
+    {
+      "region": "eu",
+      "slug": "lothar",
+      "name": "Lothar",
+      "connected_id": -88
+    },
+    {
+      "region": "eu",
+      "slug": "baelgun",
+      "name": "Baelgun",
+      "connected_id": -88
+    },
+    {
+      "region": "eu",
+      "slug": "azshara",
+      "name": "Azshara",
+      "connected_id": -88
+    },
+    {
+      "region": "eu",
+      "slug": "kragjin",
+      "name": "Krag'jin",
+      "connected_id": -88
+    },
+    {
+      "region": "eu",
+      "slug": "arthas",
+      "name": "Arthas",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "durotan",
+      "name": "Durotan",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "kelthuzad",
+      "name": "Kel'Thuzad",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "veklor",
+      "name": "Vek'lor",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "tirion",
+      "name": "Tirion",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "blutkessel",
+      "name": "Blutkessel",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "wrathbringer",
+      "name": "Wrathbringer",
+      "connected_id": -89
+    },
+    {
+      "region": "eu",
+      "slug": "blackmoore",
+      "name": "Blackmoore",
+      "connected_id": -90
+    },
+    {
+      "region": "eu",
+      "slug": "tichondrius",
+      "name": "Tichondrius",
+      "connected_id": -90
+    },
+    {
+      "region": "eu",
+      "slug": "lordaeron",
+      "name": "Lordaeron",
+      "connected_id": -90
+    },
+    {
+      "region": "eu",
+      "slug": "blackrock",
+      "name": "Blackrock",
+      "connected_id": -91
+    },
+    {
+      "region": "eu",
+      "slug": "thrall",
+      "name": "Thrall",
+      "connected_id": -92
+    },
+    {
+      "region": "eu",
+      "slug": "kargath",
+      "name": "Kargath",
+      "connected_id": -92
+    },
+    {
+      "region": "eu",
+      "slug": "ambossar",
+      "name": "Ambossar",
+      "connected_id": -92
+    },
+    {
+      "region": "eu",
+      "slug": "nefarian",
+      "name": "Nefarian",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "gilneas",
+      "name": "Gilneas",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "destromath",
+      "name": "Destromath",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "gorgonnash",
+      "name": "Gorgonnash",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "mannoroth",
+      "name": "Mannoroth",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "nerathor",
+      "name": "Nera'thor",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "ulduar",
+      "name": "Ulduar",
+      "connected_id": -93
+    },
+    {
+      "region": "eu",
+      "slug": "korgall",
+      "name": "Kor'gall",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "bloodfeather",
+      "name": "Bloodfeather",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "executus",
+      "name": "Executus",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "saurfang",
+      "name": "Saurfang",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "darkspear",
+      "name": "Darkspear",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "burning-steppes",
+      "name": "Burning Steppes",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "terokkar",
+      "name": "Terokkar",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "shattered-hand",
+      "name": "Shattered Hand",
+      "connected_id": -94
+    },
+    {
+      "region": "eu",
+      "slug": "khadgar",
+      "name": "Khadgar",
+      "connected_id": -95
+    },
+    {
+      "region": "eu",
+      "slug": "bloodhoof",
+      "name": "Bloodhoof",
+      "connected_id": -95
+    },
+    {
+      "region": "eu",
+      "slug": "kul-tiras",
+      "name": "Kul Tiras",
+      "connected_id": -96
+    },
+    {
+      "region": "eu",
+      "slug": "alonsus",
+      "name": "Alonsus",
+      "connected_id": -96
+    },
+    {
+      "region": "eu",
+      "slug": "anachronos",
+      "name": "Anachronos",
+      "connected_id": -96
+    },
+    {
+      "region": "eu",
+      "slug": "dentarg",
+      "name": "Dentarg",
+      "connected_id": -97
+    },
+    {
+      "region": "eu",
+      "slug": "tarren-mill",
+      "name": "Tarren Mill",
+      "connected_id": -97
+    },
+    {
+      "region": "eu",
+      "slug": "moonglade",
+      "name": "Moonglade",
+      "connected_id": -98
+    },
+    {
+      "region": "eu",
+      "slug": "steamwheedle-cartel",
+      "name": "Steamwheedle Cartel",
+      "connected_id": -98
+    },
+    {
+      "region": "eu",
+      "slug": "the-shatar",
+      "name": "The Sha'tar",
+      "connected_id": -98
+    },
+    {
+      "region": "eu",
+      "slug": "emeriss",
+      "name": "Emeriss",
+      "connected_id": -99
+    },
+    {
+      "region": "eu",
+      "slug": "agamaggan",
+      "name": "Agamaggan",
+      "connected_id": -99
+    },
+    {
+      "region": "eu",
+      "slug": "bloodscalp",
+      "name": "Bloodscalp",
+      "connected_id": -99
+    },
+    {
+      "region": "eu",
+      "slug": "crushridge",
+      "name": "Crushridge",
+      "connected_id": -99
+    },
+    {
+      "region": "eu",
+      "slug": "hakkar",
+      "name": "Hakkar",
+      "connected_id": -99
+    },
+    {
+      "region": "eu",
+      "slug": "twilights-hammer",
+      "name": "Twilight's Hammer",
+      "connected_id": -99
+    },
+    {
+      "region": "eu",
+      "slug": "drakthul",
+      "name": "Drak'thul",
+      "connected_id": -100
+    },
+    {
+      "region": "eu",
+      "slug": "burning-blade",
+      "name": "Burning Blade",
+      "connected_id": -100
+    },
+    {
+      "region": "eu",
+      "slug": "earthen-ring",
+      "name": "Earthen Ring",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "the-venture-co",
+      "name": "The Venture Co",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "ravenholdt",
+      "name": "Ravenholdt",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "darkmoon-faire",
+      "name": "Darkmoon Faire",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "sporeggar",
+      "name": "Sporeggar",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "scarshield-legion",
+      "name": "Scarshield Legion",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "defias-brotherhood",
+      "name": "Defias Brotherhood",
+      "connected_id": -101
+    },
+    {
+      "region": "eu",
+      "slug": "ysera",
+      "name": "Ysera",
+      "connected_id": -102
+    },
+    {
+      "region": "eu",
+      "slug": "malorne",
+      "name": "Malorne",
+      "connected_id": -102
+    },
+    {
+      "region": "eu",
+      "slug": "malygos",
+      "name": "Malygos",
+      "connected_id": -103
+    },
+    {
+      "region": "eu",
+      "slug": "malfurion",
+      "name": "Malfurion",
+      "connected_id": -103
+    },
+    {
+      "region": "eu",
+      "slug": "rexxar",
+      "name": "Rexxar",
+      "connected_id": -104
+    },
+    {
+      "region": "eu",
+      "slug": "alleria",
+      "name": "Alleria",
+      "connected_id": -104
+    },
+    {
+      "region": "eu",
+      "slug": "anetheron",
+      "name": "Anetheron",
+      "connected_id": -105
+    },
+    {
+      "region": "eu",
+      "slug": "guldan",
+      "name": "Gul'dan",
+      "connected_id": -105
+    },
+    {
+      "region": "eu",
+      "slug": "kiljaeden",
+      "name": "Kil'jaeden",
+      "connected_id": -105
+    },
+    {
+      "region": "eu",
+      "slug": "nathrezim",
+      "name": "Nathrezim",
+      "connected_id": -105
+    },
+    {
+      "region": "eu",
+      "slug": "rajaxx",
+      "name": "Rajaxx",
+      "connected_id": -105
+    },
+    {
+      "region": "eu",
+      "slug": "festung-der-stürme",
+      "name": "Festung der Stürme",
+      "connected_id": -105
+    },
+    {
+      "region": "eu",
+      "slug": "zuluhed",
+      "name": "Zuluhed",
+      "connected_id": -106
+    },
+    {
+      "region": "eu",
+      "slug": "frostmourne",
+      "name": "Frostmourne",
+      "connected_id": -106
+    },
+    {
+      "region": "eu",
+      "slug": "amanthul",
+      "name": "Aman'Thul",
+      "connected_id": -106
+    },
+    {
+      "region": "eu",
+      "slug": "anubarak",
+      "name": "Anub'arak",
+      "connected_id": -106
+    },
+    {
+      "region": "eu",
+      "slug": "dalvengyr",
+      "name": "Dalvengyr",
+      "connected_id": -106
+    },
+    {
+      "region": "eu",
+      "slug": "nazjatar",
+      "name": "Nazjatar",
+      "connected_id": -106
+    },
+    {
+      "region": "eu",
+      "slug": "die-silberne-hand",
+      "name": "Die Silberne Hand",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "kult-der-verdammten",
+      "name": "Kult der Verdammten",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "das-syndikat",
+      "name": "Das Syndikat",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "die-ewige-wacht",
+      "name": "Die ewige Wacht",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "die-todeskrallen",
+      "name": "Die Todeskrallen",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "der-abyssische-rat",
+      "name": "Der abyssische Rat",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "das-konsortium",
+      "name": "Das Konsortium",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "die-arguswacht",
+      "name": "Die Arguswacht",
+      "connected_id": -107
+    },
+    {
+      "region": "eu",
+      "slug": "uldaman",
+      "name": "Uldaman",
+      "connected_id": -108
+    },
+    {
+      "region": "eu",
+      "slug": "drekthar",
+      "name": "Drek'Thar",
+      "connected_id": -108
+    },
+    {
+      "region": "eu",
+      "slug": "krasus",
+      "name": "Krasus",
+      "connected_id": -108
+    },
+    {
+      "region": "eu",
+      "slug": "eitrigg",
+      "name": "Eitrigg",
+      "connected_id": -108
+    },
+    {
+      "region": "eu",
+      "slug": "confrérie-du-thorium",
+      "name": "Confrérie du Thorium",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "kirin-tor",
+      "name": "Kirin Tor",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "conseil-des-ombres",
+      "name": "Conseil des Ombres",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "les-sentinelles",
+      "name": "Les Sentinelles",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "culte-de-la-rive-noire",
+      "name": "Culte de la Rive noire",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "les-clairvoyants",
+      "name": "Les Clairvoyants",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "la-croisade-écarlate",
+      "name": "La Croisade écarlate",
+      "connected_id": -109
+    },
+    {
+      "region": "eu",
+      "slug": "outland",
+      "name": "Outland",
+      "connected_id": -110
+    },
+    {
+      "region": "eu",
+      "slug": "archimonde",
+      "name": "Archimonde",
+      "connected_id": -111
+    },
+    {
+      "region": "eu",
+      "slug": "grim-batol",
+      "name": "Grim Batol",
+      "connected_id": -112
+    },
+    {
+      "region": "eu",
+      "slug": "frostmane",
+      "name": "Frostmane",
+      "connected_id": -112
+    },
+    {
+      "region": "eu",
+      "slug": "aggra-português",
+      "name": "Aggra (Português)",
+      "connected_id": -112
+    },
+    {
+      "region": "eu",
+      "slug": "kazzak",
+      "name": "Kazzak",
+      "connected_id": -113
+    },
+    {
+      "region": "eu",
+      "slug": "chamber-of-aspects",
+      "name": "Chamber of Aspects",
+      "connected_id": -114
+    },
+    {
+      "region": "eu",
+      "slug": "wildhammer",
+      "name": "Wildhammer",
+      "connected_id": -116
+    },
+    {
+      "region": "eu",
+      "slug": "thunderhorn",
+      "name": "Thunderhorn",
+      "connected_id": -116
+    },
+    {
+      "region": "eu",
+      "slug": "elune",
+      "name": "Elune",
+      "connected_id": -117
+    },
+    {
+      "region": "eu",
+      "slug": "varimathras",
+      "name": "Varimathras",
+      "connected_id": -117
+    },
+    {
+      "region": "eu",
+      "slug": "nemesis",
+      "name": "Nemesis",
+      "connected_id": -118
+    },
+    {
+      "region": "eu",
+      "slug": "aggramar",
+      "name": "Aggramar",
+      "connected_id": -119
+    },
+    {
+      "region": "eu",
+      "slug": "hellscream",
+      "name": "Hellscream",
+      "connected_id": -119
+    },
+    {
+      "region": "eu",
+      "slug": "ravencrest",
+      "name": "Ravencrest",
+      "connected_id": -120
+    },
+    {
+      "region": "eu",
+      "slug": "suramar",
+      "name": "Suramar",
+      "connected_id": -121
+    },
+    {
+      "region": "eu",
+      "slug": "medivh",
+      "name": "Medivh",
+      "connected_id": -121
+    },
+    {
+      "region": "eu",
+      "slug": "ysondre",
+      "name": "Ysondre",
+      "connected_id": -122
+    },
+    {
+      "region": "eu",
+      "slug": "dun-modr",
+      "name": "Dun Modr",
+      "connected_id": -123
+    },
+    {
+      "region": "eu",
+      "slug": "cthun",
+      "name": "C'Thun",
+      "connected_id": -123
+    },
+    {
+      "region": "eu",
+      "slug": "zuljin",
+      "name": "Zul'jin",
+      "connected_id": -124
+    },
+    {
+      "region": "eu",
+      "slug": "uldum",
+      "name": "Uldum",
+      "connected_id": -124
+    },
+    {
+      "region": "eu",
+      "slug": "sanguino",
+      "name": "Sanguino",
+      "connected_id": -124
+    },
+    {
+      "region": "eu",
+      "slug": "shendralar",
+      "name": "Shen'dralar",
+      "connected_id": -124
+    },
+    {
+      "region": "eu",
+      "slug": "tyrande",
+      "name": "Tyrande",
+      "connected_id": -125
+    },
+    {
+      "region": "eu",
+      "slug": "colinas-pardas",
+      "name": "Colinas Pardas",
+      "connected_id": -125
+    },
+    {
+      "region": "eu",
+      "slug": "los-errantes",
+      "name": "Los Errantes",
+      "connected_id": -125
+    },
+    {
+      "region": "eu",
+      "slug": "exodar",
+      "name": "Exodar",
+      "connected_id": -126
+    },
+    {
+      "region": "eu",
+      "slug": "minahonda",
+      "name": "Minahonda",
+      "connected_id": -126
+    },
+    {
+      "region": "eu",
+      "slug": "lightbringer",
+      "name": "Lightbringer",
+      "connected_id": -127
+    },
+    {
+      "region": "eu",
+      "slug": "mazrigos",
+      "name": "Mazrigos",
+      "connected_id": -127
+    },
+    {
+      "region": "eu",
+      "slug": "hyjal",
+      "name": "Hyjal",
+      "connected_id": -128
+    },
+    {
+      "region": "eu",
+      "slug": "nordrassil",
+      "name": "Nordrassil",
+      "connected_id": -129
+    },
+    {
+      "region": "eu",
+      "slug": "bronze-dragonflight",
+      "name": "Bronze Dragonflight",
+      "connected_id": -129
+    },
+    {
+      "region": "eu",
+      "slug": "azjolnerub",
+      "name": "Azjol-Nerub",
+      "connected_id": -130
+    },
+    {
+      "region": "eu",
+      "slug": "quelthalas",
+      "name": "Quel'Thalas",
+      "connected_id": -130
+    },
+    {
+      "region": "eu",
+      "slug": "ungoro",
+      "name": "Un'Goro",
+      "connected_id": -131
+    },
+    {
+      "region": "eu",
+      "slug": "senjin",
+      "name": "Sen'jin",
+      "connected_id": -131
+    },
+    {
+      "region": "eu",
+      "slug": "area-52",
+      "name": "Area 52",
+      "connected_id": -131
+    },
+    {
+      "region": "eu",
+      "slug": "garrosh",
+      "name": "Garrosh",
+      "connected_id": -132
+    },
+    {
+      "region": "eu",
+      "slug": "nozdormu",
+      "name": "Nozdormu",
+      "connected_id": -132
+    },
+    {
+      "region": "eu",
+      "slug": "perenolde",
+      "name": "Perenolde",
+      "connected_id": -132
+    },
+    {
+      "region": "eu",
+      "slug": "teldrassil",
+      "name": "Teldrassil",
+      "connected_id": -132
+    },
+    {
+      "region": "eu",
+      "slug": "shattrath",
+      "name": "Shattrath",
+      "connected_id": -132
+    },
+    {
+      "region": "eu",
+      "slug": "doomhammer",
+      "name": "Doomhammer",
+      "connected_id": -133
+    },
+    {
+      "region": "eu",
+      "slug": "turalyon",
+      "name": "Turalyon",
+      "connected_id": -133
+    },
+    {
+      "region": "eu",
+      "slug": "draenor",
+      "name": "Draenor",
+      "connected_id": -134
+    },
+    {
+      "region": "eu",
+      "slug": "todeswache",
+      "name": "Todeswache",
+      "connected_id": -135
+    },
+    {
+      "region": "eu",
+      "slug": "forscherliga",
+      "name": "Forscherliga",
+      "connected_id": -135
+    },
+    {
+      "region": "eu",
+      "slug": "der-rat-von-dalaran",
+      "name": "Der Rat von Dalaran",
+      "connected_id": -135
+    },
+    {
+      "region": "eu",
+      "slug": "der-mithrilorden",
+      "name": "Der Mithrilorden",
+      "connected_id": -135
+    },
+    {
+      "region": "eu",
+      "slug": "die-nachtwache",
+      "name": "Die Nachtwache",
+      "connected_id": -135
+    },
+    {
+      "region": "eu",
+      "slug": "zirkel-des-cenarius",
+      "name": "Zirkel des Cenarius",
+      "connected_id": -135
+    },
+    {
+      "region": "eu",
+      "slug": "khazgoroth",
+      "name": "Khaz'goroth",
+      "connected_id": -136
+    },
+    {
+      "region": "eu",
+      "slug": "arygos",
+      "name": "Arygos",
+      "connected_id": -136
+    },
+    {
+      "region": "eu",
+      "slug": "norgannon",
+      "name": "Norgannon",
+      "connected_id": -137
+    },
+    {
+      "region": "eu",
+      "slug": "dun-morogh",
+      "name": "Dun Morogh",
+      "connected_id": -137
+    },
+    {
+      "region": "eu",
+      "slug": "blades-edge",
+      "name": "Blade's Edge",
+      "connected_id": -138
+    },
+    {
+      "region": "eu",
+      "slug": "bronzebeard",
+      "name": "Bronzebeard",
+      "connected_id": -138
+    },
+    {
+      "region": "eu",
+      "slug": "eonar",
+      "name": "Eonar",
+      "connected_id": -138
+    },
+    {
+      "region": "eu",
+      "slug": "aerie-peak",
+      "name": "Aerie Peak",
+      "connected_id": -138
+    },
+    {
+      "region": "eu",
+      "slug": "veknilash",
+      "name": "Vek'nilash",
+      "connected_id": -138
+    },
+    {
+      "region": "eu",
+      "slug": "azuremyst",
+      "name": "Azuremyst",
+      "connected_id": -139
+    },
+    {
+      "region": "eu",
+      "slug": "stormrage",
+      "name": "Stormrage",
+      "connected_id": -139
+    },
+    {
+      "region": "eu",
+      "slug": "hellfire",
+      "name": "Hellfire",
+      "connected_id": -140
+    },
+    {
+      "region": "eu",
+      "slug": "arathor",
+      "name": "Arathor",
+      "connected_id": -140
+    },
+    {
+      "region": "eu",
+      "slug": "runetotem",
+      "name": "Runetotem",
+      "connected_id": -140
+    },
+    {
+      "region": "eu",
+      "slug": "kilrogg",
+      "name": "Kilrogg",
+      "connected_id": -140
+    },
+    {
+      "region": "eu",
+      "slug": "nagrand",
+      "name": "Nagrand",
+      "connected_id": -140
+    },
+    {
+      "region": "eu",
+      "slug": "dragonblight",
+      "name": "Dragonblight",
+      "connected_id": -141
+    },
+    {
+      "region": "eu",
+      "slug": "deathwing",
+      "name": "Deathwing",
+      "connected_id": -141
+    },
+    {
+      "region": "eu",
+      "slug": "lightnings-blade",
+      "name": "Lightning's Blade",
+      "connected_id": -141
+    },
+    {
+      "region": "eu",
+      "slug": "ghostlands",
+      "name": "Ghostlands",
+      "connected_id": -141
+    },
+    {
+      "region": "eu",
+      "slug": "karazhan",
+      "name": "Karazhan",
+      "connected_id": -141
+    },
+    {
+      "region": "eu",
+      "slug": "the-maelstrom",
+      "name": "The Maelstrom",
+      "connected_id": -141
+    },
+    {
+      "region": "eu",
+      "slug": "auchindoun",
+      "name": "Auchindoun",
+      "connected_id": -142
+    },
+    {
+      "region": "eu",
+      "slug": "dunemaul",
+      "name": "Dunemaul",
+      "connected_id": -142
+    },
+    {
+      "region": "eu",
+      "slug": "sylvanas",
+      "name": "Sylvanas",
+      "connected_id": -142
+    },
+    {
+      "region": "eu",
+      "slug": "jaedenar",
+      "name": "Jaedenar",
+      "connected_id": -142
+    },
+    {
+      "region": "eu",
+      "slug": "sunstrider",
+      "name": "Sunstrider",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "daggerspine",
+      "name": "Daggerspine",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "balnazzar",
+      "name": "Balnazzar",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "laughing-skull",
+      "name": "Laughing Skull",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "chromaggus",
+      "name": "Chromaggus",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "trollbane",
+      "name": "Trollbane",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "talnivarr",
+      "name": "Talnivarr",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "ahnqiraj",
+      "name": "Ahn'Qiraj",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "shattered-halls",
+      "name": "Shattered Halls",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "boulderfist",
+      "name": "Boulderfist",
+      "connected_id": -143
+    },
+    {
+      "region": "eu",
+      "slug": "gordunni",
+      "name": "Gordunni",
+      "connected_id": -144
+    },
+    {
+      "region": "eu",
+      "slug": "soulflayer",
+      "name": "Soulflayer",
+      "connected_id": -145
+    },
+    {
+      "region": "eu",
+      "slug": "deathguard",
+      "name": "Deathguard",
+      "connected_id": -146
+    },
+    {
+      "region": "eu",
+      "slug": "galakrond",
+      "name": "Galakrond",
+      "connected_id": -147
+    },
+    {
+      "region": "eu",
+      "slug": "deepholm",
+      "name": "Deepholm",
+      "connected_id": -147
+    },
+    {
+      "region": "eu",
+      "slug": "razuvious",
+      "name": "Razuvious",
+      "connected_id": -147
+    },
+    {
+      "region": "eu",
+      "slug": "die-aldor",
+      "name": "Die Aldor",
+      "connected_id": -149
+    },
+    {
+      "region": "eu",
+      "slug": "marécage-de-zangar",
+      "name": "Marécage de Zangar",
+      "connected_id": -150
+    },
+    {
+      "region": "eu",
+      "slug": "sinstralis",
+      "name": "Sinstralis",
+      "connected_id": -150
+    },
+    {
+      "region": "eu",
+      "slug": "dalaran",
+      "name": "Dalaran",
+      "connected_id": -150
+    },
+    {
+      "region": "eu",
+      "slug": "chogall",
+      "name": "Cho'gall",
+      "connected_id": -150
+    },
+    {
+      "region": "eu",
+      "slug": "eldrethalas",
+      "name": "Eldre'Thalas",
+      "connected_id": -150
+    },
+    {
+      "region": "eu",
+      "slug": "fordragon",
+      "name": "Fordragon",
+      "connected_id": -151
+    },
+    {
+      "region": "eu",
+      "slug": "illidan",
+      "name": "Illidan",
+      "connected_id": -152
+    },
+    {
+      "region": "eu",
+      "slug": "arathi",
+      "name": "Arathi",
+      "connected_id": -152
+    },
+    {
+      "region": "eu",
+      "slug": "temple-noir",
+      "name": "Temple noir",
+      "connected_id": -152
+    },
+    {
+      "region": "eu",
+      "slug": "naxxramas",
+      "name": "Naxxramas",
+      "connected_id": -152
+    },
+    {
+      "region": "eu",
+      "slug": "azuregos",
+      "name": "Azuregos",
+      "connected_id": -153
+    },
+    {
+      "region": "eu",
+      "slug": "ashenvale",
+      "name": "Ashenvale",
+      "connected_id": -154
+    },
+    {
+      "region": "eu",
+      "slug": "eversong",
+      "name": "Eversong",
+      "connected_id": -155
+    },
+    {
+      "region": "eu",
+      "slug": "goldrinn",
+      "name": "Goldrinn",
+      "connected_id": -156
+    },
+    {
+      "region": "eu",
+      "slug": "lich-king",
+      "name": "Lich King",
+      "connected_id": -156
+    },
+    {
+      "region": "eu",
+      "slug": "greymane",
+      "name": "Greymane",
+      "connected_id": -156
+    },
+    {
+      "region": "eu",
+      "slug": "blackscar",
+      "name": "Blackscar",
+      "connected_id": -157
+    },
+    {
+      "region": "eu",
+      "slug": "deathweaver",
+      "name": "Deathweaver",
+      "connected_id": -157
+    },
+    {
+      "region": "eu",
+      "slug": "booty-bay",
+      "name": "Booty Bay",
+      "connected_id": -157
+    },
+    {
+      "region": "eu",
+      "slug": "thermaplugg",
+      "name": "Thermaplugg",
+      "connected_id": -157
+    },
+    {
+      "region": "eu",
+      "slug": "grom",
+      "name": "Grom",
+      "connected_id": -157
+    },
+    {
+      "region": "eu",
+      "slug": "borean-tundra",
+      "name": "Borean Tundra",
+      "connected_id": -157
+    },
+    {
+      "region": "eu",
+      "slug": "stormscale",
+      "name": "Stormscale",
+      "connected_id": -158
+    },
+    {
+      "region": "eu",
+      "slug": "emerald-dream",
+      "name": "Emerald Dream",
+      "connected_id": -159
+    },
+    {
+      "region": "eu",
+      "slug": "terenas",
+      "name": "Terenas",
+      "connected_id": -159
+    },
+    {
+      "region": "eu",
+      "slug": "dragonmaw",
+      "name": "Dragonmaw",
+      "connected_id": -161
+    },
+    {
+      "region": "eu",
+      "slug": "spinebreaker",
+      "name": "Spinebreaker",
+      "connected_id": -161
+    },
+    {
+      "region": "eu",
+      "slug": "stormreaver",
+      "name": "Stormreaver",
+      "connected_id": -161
+    },
+    {
+      "region": "eu",
+      "slug": "vashj",
+      "name": "Vashj",
+      "connected_id": -161
+    },
+    {
+      "region": "eu",
+      "slug": "haomarush",
+      "name": "Haomarush",
+      "connected_id": -161
+    },
+    {
+      "region": "eu",
+      "slug": "zenedar",
+      "name": "Zenedar",
+      "connected_id": -162
+    },
+    {
+      "region": "eu",
+      "slug": "bladefist",
+      "name": "Bladefist",
+      "connected_id": -162
+    },
+    {
+      "region": "eu",
+      "slug": "genjuros",
+      "name": "Genjuros",
+      "connected_id": -162
+    },
+    {
+      "region": "eu",
+      "slug": "darksorrow",
+      "name": "Darksorrow",
+      "connected_id": -162
+    },
+    {
+      "region": "eu",
+      "slug": "frostwhisper",
+      "name": "Frostwhisper",
+      "connected_id": -162
+    },
+    {
+      "region": "eu",
+      "slug": "neptulon",
+      "name": "Neptulon",
+      "connected_id": -162
+    },
+    {
+      "region": "eu",
+      "slug": "aszune",
+      "name": "Aszune",
+      "connected_id": -163
+    },
+    {
+      "region": "eu",
+      "slug": "shadowsong",
+      "name": "Shadowsong",
+      "connected_id": -163
+    },
+    {
+      "region": "eu",
+      "slug": "twisting-nether",
+      "name": "Twisting Nether",
+      "connected_id": -164
+    },
+    {
+      "region": "eu",
+      "slug": "aegwynn",
+      "name": "Aegwynn",
+      "connected_id": -165
+    },
+    {
+      "region": "eu",
+      "slug": "magtheridon",
+      "name": "Magtheridon",
+      "connected_id": -166
+    },
+    {
+      "region": "eu",
+      "slug": "ragnaros",
+      "name": "Ragnaros",
+      "connected_id": -167
+    },
+    {
+      "region": "eu",
+      "slug": "khaz-modan",
+      "name": "Khaz Modan",
+      "connected_id": -169
+    },
+    {
+      "region": "eu",
+      "slug": "blackhand",
+      "name": "Blackhand",
+      "connected_id": -170
+    },
+    {
+      "region": "eu",
+      "slug": "malganis",
+      "name": "Mal'Ganis",
+      "connected_id": -170
+    },
+    {
+      "region": "eu",
+      "slug": "taerar",
+      "name": "Taerar",
+      "connected_id": -170
+    },
+    {
+      "region": "eu",
+      "slug": "echsenkessel",
+      "name": "Echsenkessel",
+      "connected_id": -170
+    },
+    {
+      "region": "eu",
+      "slug": "eredar",
+      "name": "Eredar",
+      "connected_id": -171
+    },
+    {
+      "region": "eu",
+      "slug": "alexstrasza",
+      "name": "Alexstrasza",
+      "connected_id": -172
+    },
+    {
+      "region": "eu",
+      "slug": "madmortem",
+      "name": "Madmortem",
+      "connected_id": -172
+    },
+    {
+      "region": "eu",
+      "slug": "proudmoore",
+      "name": "Proudmoore",
+      "connected_id": -172
+    },
+    {
+      "region": "eu",
+      "slug": "nethersturm",
+      "name": "Nethersturm",
+      "connected_id": -172
+    },
+    {
+      "region": "eu",
+      "slug": "argent-dawn",
+      "name": "Argent Dawn",
+      "connected_id": -173
+    },
+    {
+      "region": "eu",
+      "slug": "frostwolf",
+      "name": "Frostwolf",
+      "connected_id": -174
+    },
+    {
+      "region": "eu",
+      "slug": "burning-legion",
+      "name": "Burning Legion",
+      "connected_id": -175
+    },
+    {
+      "region": "eu",
+      "slug": "skullcrusher",
+      "name": "Skullcrusher",
+      "connected_id": -175
+    },
+    {
+      "region": "eu",
+      "slug": "xavius",
+      "name": "Xavius",
+      "connected_id": -175
+    },
+    {
+      "region": "eu",
+      "slug": "alakir",
+      "name": "Al'Akir",
+      "connected_id": -175
+    },
+    {
+      "region": "eu",
+      "slug": "howling-fjord",
+      "name": "Howling Fjord",
+      "connected_id": -148
+    },
+    {
+      "region": "eu",
+      "slug": "pozzo-delleternità",
+      "name": "Pozzo dell'Eternità",
+      "connected_id": -115
+    },
+    {
+      "region": "eu",
+      "slug": "silvermoon",
+      "name": "Silvermoon",
+      "connected_id": -160
+    },
+    {
+      "region": "eu",
+      "slug": "antonidas",
+      "name": "Antonidas",
+      "connected_id": -168
+    },
+    {
+      "region": "tw",
+      "slug": "spirestone",
+      "name": "Spirestone",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "hellscream",
+      "name": "Hellscream",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "zealot-blade",
+      "name": "Zealot Blade",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "chillwind-point",
+      "name": "Chillwind Point",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "whisperwind",
+      "name": "Whisperwind",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "arthas",
+      "name": "Arthas",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "icecrown",
+      "name": "Icecrown",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "shadowmoon",
+      "name": "Shadowmoon",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "queldorei",
+      "name": "Quel'dorei",
+      "connected_id": -176
+    },
+    {
+      "region": "tw",
+      "slug": "dragonmaw",
+      "name": "Dragonmaw",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "stormscale",
+      "name": "Stormscale",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "frostmane",
+      "name": "Frostmane",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "world-tree",
+      "name": "World Tree",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "menethil",
+      "name": "Menethil",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "bleeding-hollow",
+      "name": "Bleeding Hollow",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "arygos",
+      "name": "Arygos",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "nightsong",
+      "name": "Nightsong",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "order-of-the-cloud-serpent",
+      "name": "Order of the Cloud Serpent",
+      "connected_id": -177
+    },
+    {
+      "region": "tw",
+      "slug": "skywall",
+      "name": "Skywall",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "sundown-marsh",
+      "name": "Sundown Marsh",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "crystalpine-stinger",
+      "name": "Crystalpine Stinger",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "demon-fall-canyon",
+      "name": "Demon Fall Canyon",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "lights-hope",
+      "name": "Light's Hope",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "silverwing-hold",
+      "name": "Silverwing Hold",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "wrathbringer",
+      "name": "Wrathbringer",
+      "connected_id": -178
+    },
+    {
+      "region": "tw",
+      "slug": "krol-blade",
+      "name": "Krol Blade",
+      "connected_id": -533
+    },
+    {
+      "region": "tw",
+      "slug": "old-blanchy",
+      "name": "Old Blanchy",
+      "connected_id": -534
+    },
+    {
+      "region": "kr",
+      "slug": "azshara",
+      "name": "Azshara",
+      "connected_id": -179
+    },
+    {
+      "region": "kr",
+      "slug": "durotan",
+      "name": "Durotan",
+      "connected_id": -180
+    },
+    {
+      "region": "kr",
+      "slug": "burning-legion",
+      "name": "Burning Legion",
+      "connected_id": -180
+    },
+    {
+      "region": "kr",
+      "slug": "stormrage",
+      "name": "Stormrage",
+      "connected_id": -180
+    },
+    {
+      "region": "kr",
+      "slug": "windrunner",
+      "name": "Windrunner",
+      "connected_id": -181
+    },
+    {
+      "region": "kr",
+      "slug": "alexstrasza",
+      "name": "Alexstrasza",
+      "connected_id": -181
+    },
+    {
+      "region": "kr",
+      "slug": "wildhammer",
+      "name": "Wildhammer",
+      "connected_id": -181
+    },
+    {
+      "region": "kr",
+      "slug": "rexxar",
+      "name": "Rexxar",
+      "connected_id": -181
+    },
+    {
+      "region": "kr",
+      "slug": "deathwing",
+      "name": "Deathwing",
+      "connected_id": -181
+    },
+    {
+      "region": "kr",
+      "slug": "zuljin",
+      "name": "Zul'jin",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "dalaran",
+      "name": "Dalaran",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "garona",
+      "name": "Garona",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "guldan",
+      "name": "Gul'dan",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "malfurion",
+      "name": "Malfurion",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "hellscream",
+      "name": "Hellscream",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "hyjal",
+      "name": "Hyjal",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "cenarius",
+      "name": "Cenarius",
+      "connected_id": -182
+    },
+    {
+      "region": "kr",
+      "slug": "norgannon",
+      "name": "Norgannon",
+      "connected_id": -182
+    }
+  ]
+}

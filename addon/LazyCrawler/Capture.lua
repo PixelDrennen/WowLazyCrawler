@@ -54,7 +54,8 @@ function LC:CaptureBank()
             local viewable=self:Call(C_Bank.CanViewBank,entry.kind)
             if viewable then
                 local ids=self:Call(C_Bank.FetchPurchasedBankTabIDs,entry.kind)
-                if ids then
+                local expected=self:Call(C_Bank.FetchNumPurchasedBankTabs,entry.kind)
+                if ids and (expected==nil or #ids>=expected) then
                     local items=self:BagItems(ids,true)
                     if items then
                         local money=self:Call(C_Bank.FetchDepositedMoney,entry.kind) or 0
@@ -132,6 +133,8 @@ LC:On("PLAYER_EQUIPMENT_CHANGED",function() LC:CaptureEquipped() end)
 LC:On("PLAYER_REGEN_ENABLED",function() if LC.captureDeferred then LC.captureDeferred=false;LC:CaptureBags() end end)
 LC:On("BANKFRAME_OPENED",function() LC.bankOpen=true;C_Timer.After(.3,function() LC:Run("bank",function() LC:CaptureBank() end) end) end)
 LC:On("PLAYERBANKSLOTS_CHANGED",function() LC:CaptureBank() end)
+LC:On("PLAYER_ACCOUNT_BANK_TAB_SLOTS_CHANGED",function() LC:CaptureBank() end)
+LC:On("BANK_TABS_CHANGED",function() LC:CaptureBank() end)
 LC:On("BANKFRAME_CLOSED",function() LC.bankOpen=false end)
 LC:On("MAIL_SHOW",function() LC.mailOpen=true;LC:CaptureMail() end)
 LC:On("MAIL_INBOX_UPDATE",function() LC:CaptureMail() end)
