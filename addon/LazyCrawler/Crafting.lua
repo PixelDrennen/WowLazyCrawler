@@ -58,6 +58,7 @@ function LC:CaptureRecipes()
             end
         end
         char.recipes={};for _,r in pairs(byID) do char.recipes[#char.recipes+1]=r end
+        table.sort(char.recipes,function(a,b)return a.name==b.name and a.id<b.id or a.name<b.name end)
         if cursor<=#ids then C_Timer.After(.01,function() LC:Run("recipes",chunk) end) else LC:CaptureSimulation();LC:Changed() end
     end
     self:Run("recipes",chunk)
@@ -70,7 +71,12 @@ function LC:CaptureSimulation()
     if type(profit)~="number" or profit~=profit then return end
     local char=self:Current();if not char then return end
     for _,recipe in ipairs(char.recipes) do
-        if tonumber(recipe.id)==tonumber(data.recipeID) then recipe.simulation={profit_copper=profit,source="CraftSim GetAverageProfit",observed_at=time()};self:Changed();break end
+        if tonumber(recipe.id)==tonumber(data.recipeID) then
+            if not recipe.simulation or recipe.simulation.profit_copper~=profit or time()-(recipe.simulation.observed_at or 0)>=30 then
+                recipe.simulation={profit_copper=profit,source="CraftSim GetAverageProfit",observed_at=time()};self:Changed()
+            end
+            break
+        end
     end
 end
 function LC:QueueRecipe(recipe)
@@ -159,7 +165,8 @@ function LC:ImportLumberProviders()
     while #self.db.lumber>2000 do table.remove(self.db.lumber,1) end
     self:Changed()
 end
-LC:On("TRADE_SKILL_SHOW",function() LC:CaptureRecipes() end)
+LC:On("TRADE_SKILL_SHOW",function() LC.professionOpen=true;LC:CaptureRecipes() end)
+LC:On("TRADE_SKILL_CLOSE",function() LC.professionOpen=false end)
 LC:On("TRADE_SKILL_LIST_UPDATE",function() if LC.recipePending then return end;LC.recipePending=true;C_Timer.After(.5,function() LC.recipePending=false;LC:CaptureRecipes() end) end)
 LC:On("TRADE_SKILL_ITEM_CRAFTED_RESULT",function(data)
     local char=LC:Current()

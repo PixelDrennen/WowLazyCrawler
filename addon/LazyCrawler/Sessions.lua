@@ -87,6 +87,7 @@ function LC:StartActivity(mode)
         if #s.routes==0 then self:Print("No verified routes available. Refresh market feeds in the desktop app, /reload, and queue routes in Radar.");return false end
         s.phase=mode=="flip" and "buy" or "withdraw"
     elseif mode=="craft" then
+        self:CaptureSimulation()
         local ranked={}
         for _,r in ipairs(self:Current().recipes or {}) do
             if r.learned~=false and not r.disabled and (self:RecipeProfit(r) or 0)>0 then ranked[#ranked+1]=r end

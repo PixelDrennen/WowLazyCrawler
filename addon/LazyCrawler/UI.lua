@@ -98,6 +98,8 @@ function LC:BuildUI()
     f:SetScript("OnUpdate",function(_,elapsed)
         self.ui.elapsed=(self.ui.elapsed or 0)+elapsed
         if self.ui.elapsed>=1 then self.ui.elapsed=0;self:RefreshHeader() end
+        self.ui.simElapsed=(self.ui.simElapsed or 0)+elapsed
+        if self.ui.simElapsed>=3 then self.ui.simElapsed=0;if self.professionOpen then self:CaptureSimulation() end end
     end)
     table.insert(UISpecialFrames,"LazyCrawlerWindow");f:Hide()
 end
@@ -112,6 +114,8 @@ function LC:RefreshHeader()
         if not capture then return "Unknown - open this container" end
         return self:Gold(capture.money)..(capture.complete==false and " (partial)" or "").." |cff8295a6"..date("%H:%M",capture.observed_at).."|r"
     end
+    local activity=self.db.activity
+    self.ui.sub:SetText(char.name.." - "..char.realm.." / "..(activity and (activity.state=="running" or activity.state=="paused") and (activity.name..": "..activity.phase) or "Choose a session").." / "..(self.auctionOpen and "Auction house" or self.bankOpen and "Bank" or self.mailOpen and "Mailbox" or "Ready"))
     self.ui.gold[1]:SetText(self:Gold(GetMoney()).." |cff8295a6live|r")
     self.ui.gold[2]:SetText(balance(self.db.warbank));self.ui.gold[3]:SetText(balance(char.storages.mail))
     local session=self.db.activity;local active=session and (session.state=="running" or session.state=="paused")

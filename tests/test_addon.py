@@ -222,3 +222,13 @@ def test_session_can_skip_unavailable_route_without_hanging(lua):
     lua.execute('LC:StartActivity("flip");LC:SkipSessionRoute(LC.db.activity.routes[1])')
     assert lua.eval('LC.db.activity.state')=='stopped'
     assert lua.eval('#LC.db.activity.routes')==0
+
+
+def test_start_crafting_reads_open_craftsim_recipe_without_waiting_for_another_game_event(lua):
+    lua.execute('''LC:CaptureRecipes();DrainTimers()
+    CraftSimAPI={GetOpenRecipeData=function()return {recipeID=42,GetAverageProfit=function()return 50000 end}end}
+    LC:StartActivity('craft')''')
+    assert lua.eval('LC.db.activity.mode')=='craft'
+    assert lua.eval('LC:Current().recipes[1].simulation.profit_copper')==50000
+    lua.execute('LC:Export();LC:CaptureSimulation()')
+    assert lua.eval('LC.dirty') is False  # Stable simulations do not create an export/refresh loop.
