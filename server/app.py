@@ -137,7 +137,7 @@ def status():
     return dict(version='0.1.0',database='connected',schema=version,observations=count,
                 data_bytes=files,disk_free=disk.free,memory_bytes=memory,uptime_seconds=int(time.time()-STARTED),
                 worker='scanning' if scanner.task and not scanner.task.done() else 'idle',
-                next_scan=scanner.next_scan,sources=db.rows('SELECT s.*, MIN(o.observed_at) AS observed_at FROM sources s LEFT JOIN observations o ON o.source=s.id GROUP BY s.id ORDER BY s.id'),
+                tutorial_complete=db.get('tutorial_complete',False),next_scan=scanner.next_scan,sources=db.rows('SELECT s.*, MIN(o.observed_at) AS observed_at FROM sources s LEFT JOIN observations o ON o.source=s.id GROUP BY s.id ORDER BY s.id'),
                 jobs=db.rows('SELECT * FROM jobs ORDER BY id DESC LIMIT 20'),
                 blizzard_configured=bool(read_credentials().get('client_secret')), addon_status='Not connected · addon milestone pending')
 
@@ -171,6 +171,12 @@ def trades():
 def history(item_id: int):
     config = Settings(**db.get('config', {}))
     return db.rows('SELECT * FROM history WHERE region=? AND item_key=? ORDER BY observed_at DESC LIMIT 500', (config.region,str(item_id)))
+
+
+@app.post('/api/tutorial/complete')
+def complete_tutorial():
+    db.put('tutorial_complete',True)
+    return {'completed':True}
 
 
 @app.get('/api/realms')

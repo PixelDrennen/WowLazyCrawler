@@ -65,6 +65,7 @@ type Job = {
   message: string;
 };
 type Status = {
+  tutorial_complete: boolean;
   version: string;
   database: string;
   schema: number;
@@ -191,15 +192,18 @@ function App() {
     [search, setSearch] = useState(""),
     [selected, setSelected] = useState<Trade | null>(null),
     [history, setHistory] = useState<any[]>([]),
-    [wizard, setWizard] = useState(
-      Number(localStorage.getItem("lc-walkthrough") || 0),
-    ),
-    [tutorial, setTutorial] = useState(0);
+    [wizard, setWizard] = useState(0);
   const [draft, setDraft] = useState<Config | null>(null),
     [realmInput, setRealmInput] = useState(""),
     [clientId, setClientId] = useState(""),
     [clientSecret, setClientSecret] = useState(""),
     [recipeJson, setRecipeJson] = useState("");
+  function dismissWizard() {
+    setWizard(-1);
+    void api("tutorial/complete", "POST").catch((e) =>
+      setError((e as Error).message),
+    );
+  }
   async function load() {
     try {
       const [c, s, t, p, r] = await Promise.all([
@@ -216,9 +220,10 @@ function App() {
       setRecipes(r);
       setAuthed(true);
       setDraft((d) => d || c);
-      setWizard((w) => (w === 0 && c.realms.length === 0 ? 1 : w));
+      setWizard((w) => (w === 0 && !s.tutorial_complete ? 1 : w));
     } catch (e) {
-      if (authed) setError((e as Error).message);
+      setError((e as Error).message);
+      if (authed === null) setAuthed(false);
     }
   }
   useEffect(() => {
@@ -232,14 +237,12 @@ function App() {
     const timer = setInterval(() => void load(), 15000);
     return () => clearInterval(timer);
   }, [authed]);
-  useEffect(() => {
-    localStorage.setItem("lc-walkthrough", String(wizard));
-  }, [wizard]);
+
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setSelected(null);
-        if (wizard > 0) setWizard(-1);
+        if (wizard > 0) dismissWizard();
       }
     };
     window.addEventListener("keydown", close);
@@ -636,7 +639,6 @@ function App() {
                       className="light-button"
                       onClick={() => {
                         setWizard(1);
-                        setTutorial(1);
                       }}
                     >
                       Walk me through it <ArrowRight size={15} />
@@ -1419,7 +1421,6 @@ function App() {
                     className="primary"
                     onClick={() => {
                       setWizard(1);
-                      setTutorial(1);
                     }}
                   >
                     Replay setup walkthrough <Play size={15} />
@@ -1560,7 +1561,7 @@ function App() {
             <button
               className="close icon-button"
               aria-label="Skip setup"
-              onClick={() => setWizard(-1)}
+              onClick={dismissWizard}
             >
               <X size={20} />
             </button>
@@ -1604,7 +1605,7 @@ function App() {
               </span>
             </div>
             <div className="toolbar">
-              <button className="text-button" onClick={() => setWizard(-1)}>
+              <button className="text-button" onClick={dismissWizard}>
                 Skip for now
               </button>
               <button
@@ -1612,9 +1613,8 @@ function App() {
                 onClick={() => {
                   if (wizard < 3) setWizard(wizard + 1);
                   else {
-                    setWizard(-1);
+                    dismissWizard();
                     setPage("sources");
-                    setTutorial(tutorial + 1);
                   }
                 }}
               >

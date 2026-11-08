@@ -49,7 +49,8 @@
         }
       },
       "icon": "desktop/icons",
-      "syncDesktopName": true
+      "syncDesktopName": true,
+      "maintainer": "PixelDrennen"
     },
     "rpm": {
       "depends": [
@@ -74,5 +75,10 @@
       "artifactName": "WoW-LazyCrawler-${version}-${arch}.AppImage"
     }
   },
-  "desktopName": "wowlazycrawler.desktop"
+  "desktopName": "wowlazycrawler.desktop",
+  "homepage": "https://github.com/PixelDrennen/WowLazyCrawler",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PixelDrennen/WowLazyCrawler.git"
+  }
 }

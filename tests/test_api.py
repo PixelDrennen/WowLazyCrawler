@@ -125,3 +125,13 @@ def test_retry_and_duplicate_scan(client):
         s.task.cancel()
         await asyncio.gather(s.task,return_exceptions=True)
     asyncio.run(run())
+
+
+def test_tutorial_state_survives_sessions_and_setting_changes(client):
+    unlock(client)
+    assert client.get('/api/status').json()['tutorial_complete'] is False
+    client.post('/api/tutorial/complete').raise_for_status()
+    client.put('/api/settings',json={'budget_gold':1234}).raise_for_status()
+    client.post('/api/logout').raise_for_status()
+    unlock(client)
+    assert client.get('/api/status').json()['tutorial_complete'] is True

@@ -41,6 +41,7 @@ The same-origin dashboard is served at `/`. APIs are under `/api`; management ro
 | credentials | PUT | Replace Blizzard client credentials; blank values clear them |
 | status | GET | Service, memory/disk/database, feeds and jobs; no secrets |
 | scan | POST | 202 job scheduled; 409 overlap; 422 no source enabled |
+| tutorial/complete | POST | Persist walkthrough completion independently of Electron’s random loopback port |
 | realms | GET | Cached selected-region discovery catalogue |
 | opportunities | GET | Top 500 ranked estimates with assumptions, risks and oldest evidence timestamp |
 | history/{item_id} | GET | Latest 500 base-item observations for selected region |
