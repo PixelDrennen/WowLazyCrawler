@@ -135,3 +135,22 @@ def test_tutorial_state_survives_sessions_and_setting_changes(client):
     client.post('/api/logout').raise_for_status()
     unlock(client)
     assert client.get('/api/status').json()['tutorial_complete'] is True
+
+
+def test_shutdown_during_scan_is_interrupted_not_success(client):
+    import asyncio
+    async def run():
+        scan=Scanner()
+        entered=asyncio.Event()
+        async def blocked(*args,**kwargs):
+            entered.set()
+            await asyncio.Future()
+        scan.fetch_source=blocked
+        task=asyncio.create_task(scan.run())
+        await entered.wait()
+        task.cancel()
+        await asyncio.gather(task,return_exceptions=True)
+    asyncio.run(run())
+    job=db.rows('SELECT * FROM jobs')[0]
+    assert job['status']=='interrupted'
+    assert job['finished'] is not None

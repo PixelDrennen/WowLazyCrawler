@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-Run `python -m pytest -q` in the project virtual environment. The initial suite covers CSV schemas and copper values; region-demand parsing; malformed/future snapshots; commodity exclusion; missing demand; stale data; conservative caps, budget and same-AH exclusions; variant preservation and bid-only handling; crafting opportunity cost and incremental concentration; missing prices; authentication, rate limit, same-origin rejection, logout, secret redaction and file permissions; configuration bounds; backup integrity/session stripping; snapshot/history deduplication; changed-feed recovery; HTTP 304 observation-age preservation; retry and scan overlap.
+Run `python -m pytest -q` in the project virtual environment. The initial suite covers CSV schemas and copper values; region-demand parsing; malformed/future snapshots; commodity exclusion; missing demand; stale data; conservative caps, budget and same-AH exclusions; variant preservation and bid-only handling; crafting opportunity cost and incremental concentration; missing prices; authentication, rate limit, same-origin rejection, logout, secret redaction and file permissions; configuration bounds; backup integrity/session stripping; snapshot/history deduplication; changed-feed recovery; HTTP 304 observation-age preservation; retry, scan overlap, persistent walkthrough state and interruption-safe shutdown.
 
 `npm --prefix web run build` performs strict TypeScript checking and a production build. `node --check desktop/main.cjs` and `bash -n scripts/*.sh` verify launcher syntax. Dependency manifests and lockfiles pin both toolchains. CI runs these and produces RPM/AppImage development artifacts. It never publishes a GitHub release.
 

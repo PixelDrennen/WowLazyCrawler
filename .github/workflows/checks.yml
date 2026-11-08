@@ -26,7 +26,7 @@ jobs:
       - run: python -m pytest -q
       - run: npm ci --prefix web && npm --prefix web run build
       - run: node --check desktop/main.cjs
-      - run: bash -n scripts/*.sh
+      - run: for script in scripts/*.sh; do bash -n "$script"; done
   package:
     needs: test
     runs-on: ubuntu-24.04
@@ -45,6 +45,11 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
       - run: .venv/bin/python scripts/smoke-bundle.py build/backend/lazycrawler-server
+      - name: Verify RPM desktop integration
+        run: |
+          rpm -qpl release/*.rpm > /tmp/rpm-files.txt
+          cat /tmp/rpm-files.txt
+          python -c "from pathlib import Path; files=Path('/tmp/rpm-files.txt').read_text(); assert '/usr/share/applications/wowlazycrawler.desktop' in files; assert '/backend/lazycrawler-server' in files"
       - uses: actions/upload-artifact@v4
         with:
           name: lazycrawler-linux-x64

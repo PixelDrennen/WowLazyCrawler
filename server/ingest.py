@@ -117,6 +117,7 @@ class Scanner:
             with db.connect() as conn:
                 job = conn.execute("INSERT INTO jobs(started,status,message) VALUES(?,'running','Downloading market snapshots')", (db.now(),)).lastrowid
             errors = []
+            cancelled = False
             try:
                 async with httpx.AsyncClient(timeout=httpx.Timeout(120, connect=15), follow_redirects=False,
                     headers={'User-Agent':'WowLazyCrawler/0.1 (self-hosted market analytics)'}) as client:
@@ -138,12 +139,16 @@ class Scanner:
                 with db.connect() as conn:
                     conn.execute('DELETE FROM history WHERE observed_at < ?', (cutoff,))
                     conn.execute('DELETE FROM jobs WHERE id NOT IN (SELECT id FROM jobs ORDER BY id DESC LIMIT 100)')
+            except asyncio.CancelledError:
+                cancelled = True
+                errors.append('Scan interrupted by shutdown; run again.')
+                raise
             except Exception as exc:
                 errors.append('Scan failed: '+type(exc).__name__)
             finally:
                 with db.connect() as conn:
                     conn.execute('UPDATE jobs SET finished=?,status=?,message=? WHERE id=?',
-                        (db.now(), 'error' if errors else 'complete', '; '.join(errors)[:1000] if errors else 'Market snapshots saved successfully', job))
+                        (db.now(), 'interrupted' if cancelled else ('error' if errors else 'complete'), '; '.join(errors)[:1000] if errors else 'Market snapshots saved successfully', job))
                 self.next_scan = time.time()+settings.interval_minutes*60
 
     def start(self):
