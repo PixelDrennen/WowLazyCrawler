@@ -42,7 +42,7 @@ def test_login_rate_limit(client):
 def test_config_validation_and_credentials_redaction(client):
     unlock(client)
     assert client.put('/api/settings',json={'realms':['../evil']}).status_code==422
-    assert client.put('/api/settings',json={'selling_realms':['b']}).status_code==422
+    assert client.put('/api/settings',json={'selling_realms':['b']}).status_code==200  # deprecated fields do not control coverage
     assert client.put('/api/settings',json={'budget_gold':-1}).status_code==422
     assert client.put('/api/credentials',json={'client_id':'id','client_secret':'sensitive'}).status_code==200
     assert 'sensitive' not in client.get('/api/status').text

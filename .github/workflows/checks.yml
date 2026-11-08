@@ -56,4 +56,5 @@ jobs:
           path: |
             release/*.rpm
             release/*.AppImage
+            release/LazyCrawler-addon.zip
           if-no-files-found: error

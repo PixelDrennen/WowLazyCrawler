@@ -59,3 +59,13 @@ The first milestone implements evidence breakdowns and single-plan concentration
 ## Desktop sources
 
 [Electron's Wayland migration](https://www.electronjs.org/blog/tech-talk-wayland) and [breaking changes](https://www.electronjs.org/docs/latest/breaking-changes) establish native Wayland selection in modern Electron. [electron-builder Linux targets](https://www.electron.build/v26/docs/linux/) document RPM/AppImage and desktop integration. Runtime and packaging versions are locked in package manifests. Native distro compatibility must still be checked on the actual Fedora installation.
+
+## 0.2.0 verification update (2026-11-08)
+
+The current TSM public page embeds realm→auction-house metadata in its React Router payload. A strict data-only parser extracted a shipped catalog of US/EU/KR/TW Retail realms, including Gurubashi's exact shared cluster. The parser uses no JS/Lua evaluation, refreshes daily, and retains a known snapshot on failure. TSM AH identities and Blizzard connected-realm endpoint IDs are separate namespaces.
+
+Current generated Blizzard API documentation was inspected in the [client UI source mirror](https://github.com/tomrus88/BlizzardInterfaceCode/tree/master/Interface/AddOns/Blizzard_APIDocumentationGenerated): bank tab/viewability and item-eligibility calls; item/decor classification; recipe schematics; owned-auction/search/post/confirmation APIs. Runtime capability checks remain necessary; reading generated source does not certify the user's exact client version or taint behavior.
+
+[Housing Lumber Helper](https://www.curseforge.com/wow/addons/housinglumberhelper) and [Thendar's Lumber & Gathering Tracker](https://www.curseforge.com/wow/addons/thendars-lumber-tracker) advertise gathering/session features, but no stable external session API was verified. Both list All Rights Reserved licensing. We detect them and provide a narrow registration contract rather than copying their code or inventing SavedVariables schemas. Personal measured sessions provide a working fallback.
+
+The [official UI Add-On Development Policy](https://us.forums.blizzard.com/en/wow/t/ui-add-on-development-policy/24534) restricts premium/paid addons and addon-related compensation. Optional commercial room is represented as a dormant server-provider interface; payment gating is not enabled, and an external server is not assumed to make a paid plan permissible. Review the actual future product and data-source terms before monetization.

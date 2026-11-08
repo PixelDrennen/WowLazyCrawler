@@ -15,11 +15,19 @@ from . import db
 from .ingest import Scanner, read_credentials, write_credentials
 from .market import opportunities, crafting_plan
 from .models import Settings, Credentials, Login, Recipe
+from .catalog import seed_catalog,markets,character_markets
+from .companion import Companion,install_addons
+from .snapshots import Snapshot,accept_snapshot
+from .admin import live_view,live_crafting
+from .access import SelfHostedAccess
+from . import demo
 
 scanner = Scanner()
+companion = Companion()
 STARTED = time.time()
 ROOT = Path(__file__).resolve().parent.parent
 attempts = {}
+trade_cache = {"key":None,"rows":[]}
 
 
 def admin_token():
@@ -35,17 +43,21 @@ def admin_token():
 async def lifespan(app):
     db.init()
     admin_token()
+    seed_catalog()
+    companion.plan_provider=addon_plan
+    bridge=asyncio.create_task(companion.loop())
     scheduler = asyncio.create_task(scanner.schedule())
     yield
     scheduler.cancel()
-    tasks = [scheduler]
+    bridge.cancel()
+    tasks = [scheduler,bridge]
     if scanner.task and not scanner.task.done():
         scanner.task.cancel()
         tasks.append(scanner.task)
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-app = FastAPI(title='WowLazyCrawler', version='0.1.0', lifespan=lifespan, docs_url=None, redoc_url=None)
+app = FastAPI(title='WowLazyCrawler', version='0.2.0', lifespan=lifespan, docs_url=None, redoc_url=None)
 
 
 @app.middleware('http')
@@ -74,7 +86,7 @@ async def security(request: Request, call_next):
 def health():
     with db.connect() as conn:
         conn.execute('SELECT 1')
-    return {'status':'ok','version':'0.1.0'}
+    return {'status':'ok','version':'0.2.0'}
 
 
 @app.post('/api/login')
@@ -109,9 +121,9 @@ def settings():
 
 @app.put('/api/settings')
 def save_settings(payload: Settings):
-    if not set(payload.selling_realms).issubset(payload.realms):
-        raise HTTPException(422,'Selling realms must also be scanned realms')
+    # Legacy realm fields are retained only to read old configurations. Coverage is region-wide.
     db.put('config',payload.model_dump())
+    db.put('config_revision',db.now())
     scanner.next_scan = None
     return payload
 
@@ -134,12 +146,12 @@ def status():
         for line in Path('/proc/self/status').read_text().splitlines():
             if line.startswith('VmRSS:'):
                 memory = int(line.split()[1])*1024
-    return dict(version='0.1.0',database='connected',schema=version,observations=count,
+    return dict(version='0.2.0',database='connected',schema=version,observations=count,
                 data_bytes=files,disk_free=disk.free,memory_bytes=memory,uptime_seconds=int(time.time()-STARTED),
                 worker='scanning' if scanner.task and not scanner.task.done() else 'idle',
                 tutorial_complete=db.get('tutorial_complete',False),next_scan=scanner.next_scan,sources=db.rows('SELECT s.*, MIN(o.observed_at) AS observed_at FROM sources s LEFT JOIN observations o ON o.source=s.id GROUP BY s.id ORDER BY s.id'),
                 jobs=db.rows('SELECT * FROM jobs ORDER BY id DESC LIMIT 20'),
-                blizzard_configured=bool(read_credentials().get('client_secret')), addon_status='Not connected · addon milestone pending')
+                blizzard_configured=bool(read_credentials().get('client_secret')), addon_status='Connected' if db.get('last_addon_sync') else 'Waiting for first addon export')
 
 
 @app.post('/api/scan', status_code=202)
@@ -153,18 +165,51 @@ async def start_scan():
 
 
 def active_observations(config):
-    values = db.rows('SELECT * FROM observations WHERE region=?', (config.region,))
-    return [r for r in values if (r['scope']!='realm' or r['realm'] in config.realms) and
-            ((r['source'].startswith('tsm:') and config.tsm_enabled) or
-             (r['source'].startswith('blizzard:') and config.blizzard_enabled))]
+    reps={m['representative'] for m in markets(config.region)}
+    values=db.rows('SELECT * FROM observations WHERE region=?',(config.region,))
+    return [r for r in values if (r['scope']!='realm' or r['realm'] in reps) and
+            ((r['source'].startswith('tsm:') and config.tsm_enabled) or (r['source'].startswith('blizzard:') and config.blizzard_enabled))]
+
+
+def live_trades():
+    config=Settings(**db.get('config',{}))
+    key=(config.model_dump_json(),db.get('market_revision'),db.get('last_addon_sync'),int(time.time()//300))
+    if trade_cache['key']==key:return [r for r in trade_cache['rows'] if r['expires_at']>time.time()]
+    coverage=markets(config.region)
+    owned=character_markets(config.region)
+    if not owned:return []
+    config.realms=[m['representative'] for m in coverage]
+    config.selling_realms=[m['representative'] for m in coverage if m['connected_id'] in owned]
+    transferable={r['item_key']:bool(r['transferable']) for r in db.rows('SELECT * FROM metadata')}
+    clusters={r['slug']:r['connected_id'] for r in db.rows('SELECT * FROM realms WHERE region=?',(config.region,))}
+    # Stream one item's realm rows at a time. Loading an entire region as Python
+    # dictionaries would turn a personal server into a multi-GB request.
+    import itertools,heapq
+    regional={r['item_key']:r for r in db.rows("SELECT * FROM observations WHERE region=? AND scope='region' AND source LIKE 'tsm:%'",(config.region,))}
+    heap=[];sequence=0;representatives=set(config.realms)
+    if config.tsm_enabled:
+        with db.connect() as conn:
+            cursor=conn.execute("SELECT * FROM observations WHERE region=? AND scope='realm' AND source LIKE 'tsm:%' AND buyout>0 ORDER BY item_key",(config.region,))
+            for item_key,group in itertools.groupby(cursor,key=lambda r:r['item_key']):
+                rows=[dict(r) for r in group if r['realm'] in representatives]
+                context=regional.get(item_key)
+                if not context:continue
+                for candidate in opportunities([context]+rows,config,transferable,realm_groups=clusters):
+                    sequence+=1
+                    value=(candidate['score'],sequence,candidate)
+                    if len(heap)<500:heapq.heappush(heap,value)
+                    elif value[0]>heap[0][0]:heapq.heapreplace(heap,value)
+    result=[row[2] for row in sorted(heap,key=lambda row:(-row[0],row[1]))]
+    from datetime import datetime
+    for row in result:row['expires_at']=int(datetime.fromisoformat(row['observed_at']).timestamp())+config.max_age_hours*3600
+    trade_cache.update(key=key,rows=result)
+    return result
 
 
 @app.get('/api/opportunities')
 def trades():
-    config = Settings(**db.get('config', {}))
-    transferable = {r['item_key']:bool(r['transferable']) for r in db.rows('SELECT * FROM metadata')}
-    clusters = {r['slug']:r['connected_id'] for r in db.rows('SELECT * FROM realms WHERE region=?', (config.region,))}
-    return opportunities(active_observations(config),config,transferable,realm_groups=clusters)
+    config=Settings(**db.get('config',{}))
+    return demo.dataset(config)['trades'] if config.demo_mode else live_trades()
 
 
 @app.get('/api/history/{item_id}')
@@ -241,6 +286,42 @@ def backup():
 @app.get('/api/contract')
 def contract():
     return app.openapi()
+
+
+@app.get('/api/admin')
+def admin_view():
+    config=Settings(**db.get('config',{}))
+    result=demo.dataset(config) if config.demo_mode else live_view(config,live_trades)
+    result['service']=status()
+    result['companion']=companion.status()
+    result['catalog']=db.get('catalog_provenance',{})
+    result['catalog_error']=db.get('catalog_error')
+    result['access']=SelfHostedAccess().describe()
+    return result
+
+
+@app.post('/api/addon/snapshot')
+def receive_snapshot(payload:Snapshot):
+    return accept_snapshot(payload.model_dump(),origin='authenticated addon transport')
+
+
+@app.get('/api/addon/plan')
+def addon_plan():
+    config=Settings(**db.get('config',{}))
+    # This endpoint deliberately never uses the presentation/demo view.
+    return dict(schema_version=2,origin='live',generated_at=db.now(),generated_epoch=int(time.time()),region=config.region,
+        opportunities=live_trades(),crafting=live_crafting(config),theme=config.theme,
+        catalog=markets(config.region),limits=dict(budget_gold=config.budget_gold,max_item_gold=config.max_item_gold,min_roi=config.min_roi))
+
+
+@app.post('/api/companion/install')
+def install_companion():
+    try:return install_addons(Settings(**db.get('config',{})).wow_path)
+    except (ValueError,OSError) as exc:raise HTTPException(422,str(exc)) from None
+
+
+@app.get('/api/companion')
+def companion_status():return companion.status()
 
 
 static = ROOT/'web'/'dist'

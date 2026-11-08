@@ -1,4 +1,11 @@
-const { app, BrowserWindow, dialog, session, shell } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  dialog,
+  session,
+  shell,
+  ipcMain,
+} = require("electron");
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -64,7 +71,7 @@ async function start() {
       const result = await fetch(`http://127.0.0.1:${record.port}/api/health`, {
         signal: AbortSignal.timeout(1000),
       });
-      if (result.ok && (await result.json()).version === "0.1.0")
+      if (result.ok && (await result.json()).version === "0.2.0")
         existing = record;
     }
   } catch {}
@@ -146,10 +153,23 @@ async function start() {
     autoHideMenuBar: true,
     title: "WoW LazyCrawler",
     webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
     },
+  });
+  ipcMain.handle("lazycrawler:choose-wow-folder", async (event) => {
+    if (
+      event.sender !== win.webContents ||
+      new URL(event.sender.getURL()).origin !== url
+    )
+      throw new Error("Untrusted window");
+    const result = await dialog.showOpenDialog(win, {
+      title: "Choose World of Warcraft Retail folder",
+      properties: ["openDirectory"],
+    });
+    return result.canceled ? null : result.filePaths[0];
   });
   win.webContents.setWindowOpenHandler(({ url: target }) => {
     if (

@@ -2,6 +2,7 @@
 import csv
 import io
 import math
+import heapq
 from datetime import datetime, timezone
 
 
@@ -88,22 +89,32 @@ def opportunities(observations, settings, transferable, clock=None, realm_groups
         elif row['scope'] == 'realm' and row['source'].startswith('tsm:') and row['buyout'] > 0:
             groups.setdefault(row['item_key'], []).append(row)
     results = []
+    sequence=0
     for key, realms in groups.items():
         context = regional.get(key)
         if not context or not context['sold_day'] or context['sold_day'] < settings.min_sold_day:
             continue
         if 1 / context['sold_day'] > settings.max_sale_days:
             continue
+        # Collapse shared houses once and retain only the two cheapest distinct
+        # sources needed for each destination. Region-wide work stays O(rows log R),
+        # rather than building a new O(R) candidate list for every destination.
+        by_cluster={}
+        for row in realms:
+            cluster=(realm_groups or {}).get(row['realm'],row['realm'])
+            if cluster not in by_cluster or row['buyout']<by_cluster[cluster]['buyout']:
+                by_cluster[cluster]=row
+        realms=sorted(by_cluster.values(),key=lambda r:r['buyout'])
+        owned_sources=[r for r in realms if r['realm'] in settings.selling_realms]
+        if transferable.get(key) is False:
+            continue
         for dest in realms:
-            if dest['realm'] not in settings.selling_realms:
-                continue
             # Connected realms share one AH; unknown cluster mapping is explicitly flagged.
-            eligible = [r for r in realms if r['realm'] != dest['realm'] and
-                        not ((realm_groups or {}).get(r['realm']) is not None and
-                             (realm_groups or {}).get(r['realm']) == (realm_groups or {}).get(dest['realm']))]
-            if not eligible:
+            pool=realms if dest['realm'] in settings.selling_realms else owned_sources
+            destination_cluster=(realm_groups or {}).get(dest['realm'],dest['realm'])
+            src=next((r for r in pool[:2] if (realm_groups or {}).get(r['realm'],r['realm'])!=destination_cluster),None)
+            if src is None:
                 continue
-            src = min(eligible, key=lambda r:r['buyout'])
             caps = [dest['buyout'], dest['market'], dest['historical'], context['market'], context['historical']]
             if context['sale_price']:
                 caps.append(context['sale_price'])
@@ -128,12 +139,17 @@ def opportunities(observations, settings, transferable, clock=None, realm_groups
                 risks.append('Destination listing is far above conservative valuation.')
             confidence = 'review' if not verified else 'estimated'
             score = net * min(context['sold_day'], 1) / (1 + len(risks))
-            results.append(dict(item_key=key, name=src['name'], source_realm=src['realm'], destination_realm=dest['realm'],
+            if len(results)>=500 and score<=results[0][0]:
+                continue
+            entry=dict(source_covered=src['realm'] in settings.selling_realms,destination_covered=dest['realm'] in settings.selling_realms,item_key=key, name=src['name'], source_realm=src['realm'], destination_realm=dest['realm'],
                 buyout=src['buyout'], estimated_sale=exit_price, net_profit=net, roi=round(roi,1),
                 sold_day=context['sold_day'], score=round(score), confidence=confidence, risks=risks,
                 observed_at=min(src['observed_at'], dest['observed_at'], context['observed_at']),
-                explanation='Estimated exit = 90% of lowest available destination/regional historical, market, sale and buyout values. Fees and deposit reserve deducted.'))
-    return sorted(results, key=lambda r:r['score'], reverse=True)[:500]
+                explanation='Estimated exit = 90% of lowest available destination/regional historical, market, sale and buyout values. Fees and deposit reserve deducted.')
+            sequence+=1
+            if len(results)<500:heapq.heappush(results,(score,sequence,entry))
+            else:heapq.heapreplace(results,(score,sequence,entry))
+    return [row[2] for row in sorted(results,key=lambda row:(-row[0],row[1]))]
 
 
 def crafting_plan(recipe, settings, commodity_prices):

@@ -1,6 +1,6 @@
 {
   "name": "wowlazycrawler",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Self-hosted WoW auction and crafting intelligence",
   "author": {
     "name": "Drennen Dooms"
@@ -10,10 +10,11 @@
   "main": "desktop/main.cjs",
   "scripts": {
     "build:web": "npm --prefix web run build",
-    "build:server": ".venv/bin/python -m PyInstaller --noconfirm --clean --onedir --name lazycrawler-server --distpath build/backend --workpath build/pyinstaller --add-data 'web/dist:web/dist' --collect-all uvicorn --collect-all server server_entry.py",
+    "build:server": ".venv/bin/python -m PyInstaller --noconfirm --clean --onedir --name lazycrawler-server --distpath build/backend --workpath build/pyinstaller --add-data 'web/dist:web/dist' --add-data 'addon:addon' --collect-all uvicorn --collect-all server server_entry.py",
     "desktop": "npm run build:web && electron .",
-    "package:linux": "npm run build:web && npm run build:server && electron-builder --linux rpm AppImage",
-    "package:dir": "npm run build:web && npm run build:server && electron-builder --linux dir"
+    "package:linux": "npm run build:web && npm run build:server && npm run package:addon && electron-builder --linux rpm AppImage",
+    "package:dir": "npm run build:web && npm run build:server && electron-builder --linux dir",
+    "package:addon": "python3 scripts/package-addon.py"
   },
   "devDependencies": {
     "electron": "45.2.3",

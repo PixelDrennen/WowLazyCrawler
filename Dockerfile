@@ -11,6 +11,7 @@ COPY requirements-runtime-lock.txt ./
 RUN pip install --no-cache-dir -r requirements-runtime-lock.txt && useradd --uid 1000 --create-home crawler && mkdir /data && chown crawler:crawler /data
 COPY server/ server/
 COPY server_entry.py ./
+COPY addon/ addon/
 COPY --from=web /app/web/dist web/dist
 USER crawler
 ENV LAZYCRAWLER_DATA=/data

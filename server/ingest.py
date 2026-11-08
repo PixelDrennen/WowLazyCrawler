@@ -7,6 +7,7 @@ import httpx
 from . import db
 from .market import parse_tsm, parse_blizzard
 from .models import Settings
+from .catalog import markets,parse_public_catalog,save_catalog
 
 COLUMNS = 'region,scope,realm,item_key,name,buyout,market,historical,sale_price,sale_rate,sold_day,quantity,observed_at,fetched_at,source'
 
@@ -88,21 +89,21 @@ class Scanner:
         root = f'https://{settings.region}.api.blizzard.com/data/wow'
         query = f'?namespace=dynamic-{settings.region}&locale=en_US'
         index = await self.request(client, 'GET', root+'/connected-realm/index'+query, headers=auth)
-        wanted = set(settings.realms)
+        wanted = {r['slug'] for m in markets(settings.region) for r in m['realms']}
         # Resolve clusters dynamically and save their slugs. Selected slugs may map to the same AH.
         # Walk index only when needed; realm mappings expire daily.
         refreshed = db.get('realm_refresh:'+settings.region, 0)
-        if time.time() - refreshed > 86400 or any(not db.rows('SELECT 1 FROM realms WHERE region=? AND slug=?', (settings.region,r)) for r in wanted):
+        if time.time() - refreshed > 86400 or any(not db.rows('SELECT 1 FROM blizzard_realms WHERE region=? AND slug=?', (settings.region,r)) for r in wanted):
             for entry in index.json()['connected_realms']:
                 cluster = int(entry['href'].split('/connected-realm/')[1].split('?')[0])
                 response = await self.request(client, 'GET', root+f'/connected-realm/{cluster}'+query, headers=auth)
                 with db.connect() as conn:
                     for realm in response.json()['realms']:
-                        conn.execute('INSERT OR REPLACE INTO realms VALUES(?,?,?,?)',
+                        conn.execute('INSERT OR REPLACE INTO blizzard_realms VALUES(?,?,?,?)',
                                      (settings.region, realm['slug'], realm['name'], cluster))
                 await asyncio.sleep(.1)
             db.put('realm_refresh:'+settings.region, time.time())
-        clusters = {r['connected_id'] for r in db.rows('SELECT * FROM realms WHERE region=?', (settings.region,)) if r['slug'] in wanted}
+        clusters = {r['connected_id'] for r in db.rows('SELECT * FROM blizzard_realms WHERE region=?', (settings.region,)) if r['slug'] in wanted}
         for cluster in sorted(clusters):
             await self.fetch_source(client, f'blizzard:{settings.region}:{cluster}', root+f'/connected-realm/{cluster}/auctions'+query,
                                     settings.region, 'realm', str(cluster), auth)
@@ -122,14 +123,38 @@ class Scanner:
                 async with httpx.AsyncClient(timeout=httpx.Timeout(120, connect=15), follow_redirects=False,
                     headers={'User-Agent':'WowLazyCrawler/0.1 (self-hosted market analytics)'}) as client:
                     if settings.tsm_enabled:
-                        feeds = [('region', '', 'region/items.csv'), ('commodity', '', 'commodities.csv')]
-                        feeds += [('realm', realm, f'realm/{realm}/items.csv') for realm in settings.realms]
-                        for scope, realm, path in feeds:
+                        # Discover every supported market; never ask the player to select realms.
+                        if time.time()-db.get('catalog_refresh',0)>86400:
                             try:
-                                await self.fetch_source(client, f'tsm:{settings.region}:{scope}:{realm}',
-                                    f'https://public-data.tradeskillmaster.com/retail/{settings.region}/{path}', settings.region, scope, realm)
-                            except ValueError as exc:
-                                errors.append(str(exc))
+                                response=await self.request(client,'GET','https://tradeskillmaster.com/public-data')
+                                save_catalog(parse_public_catalog(response.text),dict(source='TSM public realm metadata',observed_at=db.now(),kind='live catalog'))
+                                db.put('catalog_refresh',time.time())
+                                db.put('catalog_error',None)
+                            except Exception as exc:
+                                db.put('catalog_error','Catalog refresh failed; using last known catalog: '+type(exc).__name__)
+                        feeds = [('region', '', 'region/items.csv'), ('commodity', '', 'commodities.csv')]
+                        feeds += [('realm', m['representative'], f"realm/{m['representative']}/items.csv") for m in markets(settings.region)]
+                        semaphore=asyncio.Semaphore(settings.scan_concurrency)
+                        completed=0
+                        async def fetch_feed(scope,realm,path):
+                            nonlocal completed
+                            async with semaphore:
+                                try:
+                                    await self.fetch_source(client,f'tsm:{settings.region}:{scope}:{realm}',
+                                        f'https://public-data.tradeskillmaster.com/retail/{settings.region}/{path}',settings.region,scope,realm)
+                                except ValueError as exc:
+                                    errors.append(str(exc))
+                                finally:
+                                    completed+=1
+                                    with db.connect() as conn:
+                                        conn.execute('UPDATE jobs SET message=? WHERE id=?',(f'{completed}/{len(feeds)} feeds processed',job))
+                        pending=[asyncio.create_task(fetch_feed(*feed)) for feed in feeds]
+                        try:
+                            await asyncio.gather(*pending)
+                        finally:
+                            for task in pending:
+                                if not task.done():task.cancel()
+                            await asyncio.gather(*pending,return_exceptions=True)
                     if settings.blizzard_enabled:
                         try:
                             await self.blizzard(client, settings)
@@ -149,6 +174,13 @@ class Scanner:
                 with db.connect() as conn:
                     conn.execute('UPDATE jobs SET finished=?,status=?,message=? WHERE id=?',
                         (db.now(), 'interrupted' if cancelled else ('error' if errors else 'complete'), '; '.join(errors)[:1000] if errors else 'Market snapshots saved successfully', job))
+                with db.connect() as conn:
+                    payload=dict(observations=conn.execute('SELECT COUNT(*) FROM observations').fetchone()[0],
+                        healthy=conn.execute("SELECT COUNT(*) FROM sources WHERE status IN ('ready','unchanged')").fetchone()[0],
+                        failed=len(errors))
+                    conn.execute('INSERT OR REPLACE INTO telemetry VALUES(?,?)',(db.now(),json.dumps(payload)))
+                    conn.execute('DELETE FROM telemetry WHERE at < ?',((datetime.now(timezone.utc)-timedelta(days=settings.retention_days)).isoformat(),))
+                db.put('market_revision',db.now())
                 self.next_scan = time.time()+settings.interval_minutes*60
 
     def start(self):

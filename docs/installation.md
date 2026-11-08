@@ -64,3 +64,13 @@ Remote management: prefer an SSH tunnel, e.g. `ssh -L 8765:127.0.0.1:8765 user@s
 - **Wayland issue:** launch `wowlazycrawler --ozone-platform=x11` to test XWayland. No system-wide display changes are needed.
 - **Sandbox helper errors:** use the RPM installed through DNF and normal user launch. Do not use `--no-sandbox`, run Electron as root, or disable SELinux. Report the full error and distro version.
 - **No candidates:** confirm different auction markets, at least one selling realm, valid slugs, healthy feeds, and age/ROI/demand limits. Region context has its own 72-hour age allowance; realm prices default to 12 hours.
+
+## Upgrade to 0.2.0 and connect the addon
+
+The 0.2.0 RPM upgrades the same package and retains the same XDG data directory. Schema v2 adds capture/character/telemetry tables alongside existing data. No old market history or user configuration is deleted. Realm selections in old settings are deprecated and no longer restrict coverage. The default demo presentation is intentionally enabled for this update and may be switched to live in the header.
+
+Open **Addon connection**, choose the `_retail_` folder (or the parent World of Warcraft folder), save, and close WoW before clicking **Install / update addon files**. A native folder chooser is available in Electron. The app verifies a Retail executable and safe paths before copying only its own addon directories. Existing first-party addon folders are retained as `.previous` rollback copies; SavedVariables are untouched.
+
+Enable `LazyCrawler` and `LazyCrawler Data` in the character-screen addon list and run `/lc`. The standalone `LazyCrawler-addon.zip` is included beside desktop installers if manual installation is preferred. Bank/mail/profession observations happen in game; a reload/logout flushes the export. Outgoing plans wait for the client to close and load at the next startup.
+
+Use **Live observations** to see actual connected data. Demonstration characters, graphs and prices never synchronize to the addon. Capture completeness and age remain visible, including unopened mailboxes and banks. The addon is an early client-validation build; run the native tests before relying on purchases, bank movement or posting with valuable items.
