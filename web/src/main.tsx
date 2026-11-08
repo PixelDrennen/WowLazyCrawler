@@ -730,19 +730,7 @@ function App() {
             <strong>{title}</strong>
           </div>
           <div className="header-right">
-            <button
-              className={"mode-button " + (demo ? "demo-active" : "")}
-              disabled={busy}
-              onClick={() =>
-                void action(
-                  () => save({ ...config, demo_mode: !demo }),
-                  demo ? "Showing live observations" : "Demonstration enabled",
-                )
-              }
-            >
-              <span className="dot" />
-              {demo ? "Demo workspace" : "Live observations"}
-            </button>
+            <span className="mode-button"><span className="dot" />Live observations</span>
             <span className="local-tag">
               <ShieldCheck size={13} />
               Local & private
@@ -828,6 +816,15 @@ function App() {
               </button>
             )}
           </div>
+          <section className="data-health" aria-label="Data availability">
+            <strong>Data availability · observed sources only</strong>
+            {!view.last_sync && <p>No addon export received. Open LazyCrawler in WoW, then /reload. The companion imports the saved capture within about 20 seconds.</p>}
+            {view.characters.length > 0 && <p>{view.characters.filter(c => !c.captures.bank).length} characters without bank captures · {view.characters.filter(c => !c.captures.mail).length} without mailbox captures · {view.characters.filter(c => !c.captures.auctions).length} without auction captures. Open each interface on the relevant character, then /reload.</p>}
+            {view.warbanks.length === 0 && <p>Warbank balance unknown. Open a purchased warbank tab and wait for its contents to load.</p>}
+            {ready.length === 0 && <p>No fresh market feeds loaded. Run a region refresh and review ingestion errors in Service health. Opportunity and crafting estimates remain unavailable until their source data exists.</p>}
+            {view.companion.error && <p role="alert">Companion error: {view.companion.error}</p>}
+            <p>Last capture import: {view.last_sync ? date(view.last_sync) : "Not received"} · Data file: {view.companion.last_output ? date(view.companion.last_output) + " — /reload to load it" : "Not published"}</p>
+          </section>
           {page === "overview" && (
             <>
               <div className="intro-card admin-intro">
@@ -873,8 +870,8 @@ function App() {
               <div className="stats">
                 <Stat
                   label="Observed personal gold"
-                  value={coin(wallet + warbank)}
-                  sub={`${coin(mail)} pending in mail · excluded`}
+                  value={view.characters.some(c => c.captures.bags) || view.warbanks.length ? coin(wallet + warbank) : "Unknown"}
+                  sub={view.characters.some(c => c.captures.mail) ? `${coin(mail)} observed pending mail · excluded` : "Mailbox balances unknown"}
                   icon={<Wallet />}
                 />
                 <Stat
@@ -1040,19 +1037,19 @@ function App() {
               <div className="stats">
                 <Stat
                   label="Character wallets"
-                  value={coin(wallet)}
+                  value={view.characters.some(c => c.captures.bags) ? coin(wallet) : "Unknown"}
                   sub="Observed wallet balances"
                   icon={<Wallet />}
                 />
                 <Stat
                   label="Shared warbank gold"
-                  value={coin(warbank)}
+                  value={view.warbanks.length ? coin(warbank) : "Unknown"}
                   sub="Counted once per account"
                   icon={<Database />}
                 />
                 <Stat
                   label="Mailbox receivables"
-                  value={coin(mail)}
+                  value={view.characters.some(c => c.captures.mail) ? coin(mail) : "Unknown"}
                   sub="Uncollected · not liquid capital"
                   icon={<Inbox />}
                 />
@@ -1670,7 +1667,7 @@ function App() {
                       }
                     >
                       {view.companion.pending
-                        ? "Waiting for a safe update"
+                        ? "Preparing data file"
                         : "No pending write"}
                     </span>
                   </div>
@@ -1678,8 +1675,7 @@ function App() {
                     <p className="error-text">{view.companion.error}</p>
                   )}
                   <small className="estimate-note">
-                    Connection diagnostics above are always live, including in
-                    the demonstration workspace.
+                    Published data loads on the next /reload. Installing addon code still requires WoW to be closed.
                   </small>
                 </section>
                 <section className="panel padded">
@@ -1778,7 +1774,7 @@ function App() {
                   {
                     n: "04",
                     title: "Plans return safely",
-                    text: "Server results enter the separate data addon while WoW is closed and load at the next start.",
+                    text: "Server results enter the separate data addon atomically. Use /reload to load a published bundle.",
                   },
                 ].map((s) => (
                   <section className="panel padded" key={s.n}>
@@ -1806,7 +1802,7 @@ function App() {
               <Info title="WoW’s file boundary is visible, not hidden">
                 The addon cannot send arbitrary HTTP requests. Inbound character
                 captures arrive after the game saves them; outgoing data files
-                wait until the game is closed. In-game inventory capture and
+                load on your next /reload. In-game inventory capture and
                 workflow updates happen immediately within the addon.
               </Info>
             </>
@@ -2134,12 +2130,6 @@ function App() {
                       <option value="ember">Ember · apricot & violet</option>
                     </select>
                   </label>
-                  <Toggle
-                    label="Demonstration workspace"
-                    detail="Show simulated review data. Live service diagnostics remain separate."
-                    checked={draft.demo_mode}
-                    change={(v) => setDraft({ ...draft, demo_mode: v })}
-                  />
                   <p className="muted">
                     Database backups preserve settings, observations, captures,
                     and workflow history. Login sessions and provider credential

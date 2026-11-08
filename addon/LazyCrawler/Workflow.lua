@@ -51,7 +51,7 @@ function LC:QueueCandidate(candidate)
     local source,dest=self:Cluster(candidate.source_realm),self:Cluster(candidate.destination_realm)
     if not source or not dest or source==dest then self:Print("Separate auction clusters must be verified before this route can be queued.");return end
     local key=id..":"..source..":"..dest
-    if self.db.tasks[key] and self.db.tasks[key].state~="complete" then self:Print("This route is already queued.");return end
+    if self.db.tasks[key] and self.db.tasks[key].state~="complete" and self.db.tasks[key].state~="skipped" and (not self.db.tasks[key].expires_at or self.db.tasks[key].expires_at>=time()) then self:Print("This route is already queued.");return end
     self.db.tasks[key]={id=key,item_id=id,name=candidate.name,from_realm=candidate.source_realm,to_realm=candidate.destination_realm,
         state="review",buy_ceiling=candidate.buyout,post_price=candidate.estimated_sale,net_profit=candidate.net_profit,created_at=time(),quantity=1,
         evidence_time=candidate.observed_at,expires_at=candidate.expires_at,risks=candidate.risks}
@@ -95,6 +95,8 @@ function LC:AdvanceTasks(event)
     end
 end
 function LC:SearchTask(t)
+    if t.expires_at and t.expires_at<time() then self:Print("Market evidence expired. Refresh the server bundle before buying.");return end
+    if self.db.activity and self.db.activity.state=="paused" then self:Print("Resume the session before searching.");return end
     if InCombatLockdown() or not self.auctionOpen or not self:Here(t.from_realm) then self:Print(self:TaskHint(t));return end
     local char=self:Current();t.baseline=t.baseline or self:Count(char.storages.bags and char.storages.bags.items,t.item_id,true)
     t.searchKey={itemID=t.item_id,itemLevel=0,itemSuffix=0,battlePetSpeciesID=0}

@@ -1,6 +1,6 @@
 local addonName, LC = ...
 _G.LazyCrawler = LC
-LC.version = "0.2.0"
+LC.version = "0.3.0"
 LC.events = {}
 LC.dirty = false
 LC.errors = {}
@@ -94,6 +94,8 @@ function LC:Export()
     if char and self.MissingMaterials then char.material_plan=self:MissingMaterials() end
     local tasks={}
     for _,task in pairs(self.db.tasks) do tasks[#tasks+1]=task end
+    if self.CheckpointSession then self:CheckpointSession() end
+    if self.db.activity then tasks[#tasks+1]=self.db.activity end
     local payload={schema_version=2,account_id=self.db.accountID,addon_version=self.version,
         characters=self.db.characters,warbank=self.db.warbank,warbank_group=self.db.warbankGroup,lumber=self.db.lumber,
         integrations=self:IntegrationStatus(),tasks=tasks}
@@ -113,6 +115,7 @@ function LC:Initialize()
     if type(bnet)=='number' and bnet>0 then d.warbankGroup='bn:'..tostring(bnet) end
     self.data=type(LazyCrawlerData)=="table" and LazyCrawlerData.schema_version==2 and LazyCrawlerData.origin=="live" and LazyCrawlerData or {opportunities={},crafting={},catalog={}}
     if not d.settings.themeUserSet then d.settings.theme=self.data.theme or d.settings.theme or "grove" end
+    self.activityTick=GetTime()
     self:Current()
     self:CaptureBags()
     self:CaptureEquipped()

@@ -2062,3 +2062,6 @@ nav button {
 .portfolio-chart .chart svg {
   max-height: 220px;
 }
+
+.data-health { border: 1px solid #786742; background: #29271e; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; color: #e5d7ae; }
+.data-health p { font-size: 13px; line-height: 1.5; margin: 7px 0 0; }

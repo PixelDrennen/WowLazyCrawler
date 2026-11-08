@@ -2,7 +2,7 @@ local _,LC=...
 LC.lumberIDs={}
 LC.lumberProviders={}
 function LC:IntegrationStatus()
-    local result={LazyCrawler="v"..self.version.." · automatic capture"}
+    local result={LazyCrawler="v"..self.version.." / bundle: "..(self.data and self.data.generated_at or "NOT LOADED")}
     local function installed(name)
         return C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded(name)
     end
@@ -31,10 +31,14 @@ function LC:CaptureRecipes()
             if not id then break end
             local info=LC:Call(C_TradeSkillUI.GetRecipeInfo,id)
             local schematic=LC:Call(C_TradeSkillUI.GetRecipeSchematic,id,false)
-            if info and info.learned and schematic then
+            if info and schematic then
                 local old=byID[tostring(id)] or {}
                 local r={id=tostring(id),name=schematic.name or info.name,profession=profession and profession.professionName or "",
-                    output_item_id=schematic.outputItemID,crafts=old.crafts or 0,materials={}}
+                    output_item_id=schematic.outputItemID,output_quantity=schematic.quantityMin or 1,crafts=old.crafts or 0,materials={},
+                    learned=info.learned,disabled=info.disabled,disabled_reason=info.disabledReason,icon=info.icon,
+                    observed_at=time(),source_type=info.sourceType,skill_line_ability_id=info.skillLineAbilityID,
+                    description=LC:Call(C_TradeSkillUI.GetRecipeDescription,id,{}),
+                    station_requirements=LC:Call(C_TradeSkillUI.GetRecipeRequirements,id)}
                 if schematic.outputItemID and C_Item and C_Item.IsDecorItem then r.is_decor=LC:Call(C_Item.IsDecorItem,schematic.outputItemID) end
                 for _,slot in ipairs(schematic.reagentSlotSchematics or {}) do
                     if slot.reagents and #slot.reagents>0 and slot.quantityRequired and slot.quantityRequired>0 then
@@ -70,11 +74,13 @@ function LC:CaptureSimulation()
     end
 end
 function LC:QueueRecipe(recipe)
+    if recipe.learned==false or recipe.disabled then self:Print(recipe.disabled_reason or "This recipe is not learned on this character. Review its requirements first.");return end
     recipe.crafts=(recipe.crafts or 0)+1
     self:Changed();self:Print("Queued "..recipe.name..". Reagent quality choices stay in your profession UI.")
 end
 function LC:OpenRecipe(recipe)
     if InCombatLockdown() then return end
+    if recipe.character and recipe.character~=self:Current().name then self:Print("Log into "..recipe.character.." to open this observed recipe.");return end
     local id=tonumber(recipe.id)
     if C_TradeSkillUI and C_TradeSkillUI.OpenRecipe then self:Call(C_TradeSkillUI.OpenRecipe,id)
     elseif ProfessionsFrame and ProfessionsFrame.CraftingPage and ProfessionsFrame.CraftingPage.SelectRecipe then

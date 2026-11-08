@@ -41,13 +41,13 @@ def test_catalog_covers_region_and_deduplicates_gurubashi(client):
 
 def test_demo_is_isolated_from_live_and_outgoing_bundle(client):
     admin=client.get('/api/admin').json()
-    assert admin['origin']=='demo' and len(admin['characters'])==4 and len(admin['telemetry'])==24
-    assert len(admin['trades'])>0
+    assert admin['origin']=='live' and admin['characters']==[] and admin['telemetry']==[]
+    assert admin['trades']==[]
     assert not characters()
     plan=client.get('/api/addon/plan').json()
     assert plan['origin']=='live' and plan['opportunities']==[] and plan['crafting']==[]
     assert db.rows('SELECT COUNT(*) AS n FROM observations')[0]['n']==0
-    c=client.get('/api/settings').json();c['demo_mode']=False
+    c=client.get('/api/settings').json();c['demo_mode']=True
     client.put('/api/settings',json=c).raise_for_status()
     assert client.get('/api/admin').json()['characters']==[]
 
@@ -114,14 +114,15 @@ def test_savedvariables_decoder_never_executes_and_handles_utf8():
     with pytest.raises(ValueError):decode_saved_export('LazyCrawlerDB = os.execute("something")')
 
 
-def test_companion_blocks_writes_while_game_running(client,tmp_path):
+def test_companion_publishes_data_for_reload_but_blocks_install_while_game_running(client,tmp_path):
     root=tmp_path/'wow'/'_retail_';root.mkdir(parents=True);(root/'Wow.exe').touch()
     out=root/'Interface'/'AddOns'/'LazyCrawler_Data';out.mkdir(parents=True);target=out/'Data.lua';target.write_text('original')
     config=client.get('/api/settings').json();config['wow_path']=str(root);client.put('/api/settings',json=config).raise_for_status()
     worker=Companion();worker.plan_provider=lambda:{'origin':'live','schema_version':2,'opportunities':[]}
     with patch('server.companion.game_state',return_value='running'):
         worker.tick()
-        assert target.read_text()=='original' and worker.pending
+        assert 'LazyCrawlerData = ' in target.read_text() and not worker.pending
+        assert '/reload' in worker.state
         with pytest.raises(ValueError):install_addons(str(root))
     with patch('server.companion.game_state',return_value='closed'):
         worker.tick()
@@ -199,3 +200,25 @@ def test_region_routes_use_character_markets_in_both_directions(client):
     assert any(r['source_realm']==guru and r['destination_realm']=='stormrage' for r in routes)
     assert not any(r['source_realm']=='area-52' and r['destination_realm']=='stormrage' for r in routes)
     assert not any(r['source_realm']=='gurubashi' or r['destination_realm']=='gurubashi' for r in routes)  # Same cluster's non-representative feed is ignored.
+
+
+def test_crafting_discovery_uses_prices_and_demand_without_inventing_unlocks(client):
+    from server.ingest import save_snapshot
+    from server.market import parse_tsm
+    value=snapshot();recipe=dict(id='42',name='Decor',profession='Alchemy',output_item_id=777,output_quantity=1,
+        learned=False,materials=[dict(item_id=2008,quantity=3,alternatives=[2008])])
+    value['characters']['Hanami-Gurubashi']['recipes']=[recipe]
+    accept_snapshot(value)
+    config=client.get('/api/settings').json();config['deposit_gold']=0;client.put('/api/settings',json=config).raise_for_status()
+    stamp=db.now()
+    header='itemId,name,marketValue,minBuyout,historical,avgSalePrice,soldPerDay,updatedAt\n'
+    for scope,realm,line in [('realm','aegwynn','777,Decor,1000000,1000000,1000000,1000000,2,'),('region','','777,Decor,1000000,1000000,1000000,1000000,2,'),('commodity','','2008,Lumber,100000,100000,100000,100000,100,')]:
+        source='tsm:us:'+scope+':'+realm
+        save_snapshot(source,parse_tsm(header+line+stamp,'us',scope,realm,source,stamp))
+    discovery=client.get('/api/addon/plan').json()['crafting_discovery']
+    assert len(discovery)==1 and discovery[0]['profit_copper']==555000
+    assert discovery[0]['learned'] is False and discovery[0]['sold_day']==2
+    assert discovery[0]['destination_realm']=='aegwynn'
+    recipe['materials'][0]['alternatives']=[2008,2009];accept_snapshot(value)
+    assert client.get('/api/addon/plan').json()['crafting_discovery'][0]['profit_copper'] is None
+    assert client.get('/api/admin').json()['crafting']==[]  # Unlearned recipe is discovery, not a craftable queue.

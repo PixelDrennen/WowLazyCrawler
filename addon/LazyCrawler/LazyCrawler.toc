@@ -2,11 +2,12 @@
 ## Title: LazyCrawler
 ## Notes: Guided arbitrage, crafting and housing workflows with automatic portfolio capture.
 ## Author: Drennen Dooms
-## Version: 0.2.0
+## Version: 0.3.0
 ## SavedVariables: LazyCrawlerDB
 ## OptionalDeps: LazyCrawler_Data, CraftSim, Auctionator, TradeSkillMaster, Syndicator, HousingLumberHelper, ThendarsLumberTracker
 Core.lua
 Capture.lua
 Crafting.lua
 Workflow.lua
+Sessions.lua
 UI.lua

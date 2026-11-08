@@ -15,7 +15,9 @@ def live_crafting(config):
         recipes=json.loads(entry['payload'])
         for recipe in recipes[:1000]:
             if not isinstance(recipe,dict):continue
+            if recipe.get('learned') is False:continue
             simulation=recipe.get('simulation') or {}
+            if time.time()-simulation.get('observed_at',0)>config.max_age_hours*3600:simulation={}
             profit=simulation.get('profit_copper')
             if not isinstance(profit,(float,int)) or not __import__('math').isfinite(profit):profit=None
             materials=[]

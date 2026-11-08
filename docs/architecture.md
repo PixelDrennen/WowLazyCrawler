@@ -37,7 +37,7 @@ Warbank uses a Battle.net-derived group identifier when available, once across c
 
 The addon writes a versioned JSON string inside its own SavedVariables. A reload/logout is the disk-save boundary. The companion waits for stable files, parses **only the escaped JSON string**, validates schema/size/time bounds and never evaluates Lua.
 
-Outgoing plans use a separate `LazyCrawler_Data` addon. A real-only planning provider feeds it regardless of the dashboard's demo setting. The companion checks the local WoW process state before preparing and immediately before atomically replacing `Data.lua`. Running or uncertain process state defers writes. SavedVariables are never modified by the server.
+Outgoing plans use a separate `LazyCrawler_Data` addon. The companion atomically replaces only its generated `Data.lua`, even while WoW is running; the client loads it on its next reload/start. Executable addon installation still requires the client closed. SavedVariables are never modified by the server. Dashboard and transport both use real observations, regardless of a legacy demo setting.
 
 The desktop's folder-picker IPC exposes one narrow operation, verifies the calling window's origin and retains sandbox/context isolation. Install/update rejects running WoW and unsafe symlinked targets, backs up the previous addon folder, and leaves user SavedVariables intact. The companion's file path setting is explicit; it does not search arbitrary personal directories.
 
@@ -54,12 +54,6 @@ All `/api/` management endpoints except health/login retain session authenticati
 | addon/plan | GET | Always-real schema-v2 bundle; never demonstration records |
 | companion | GET | Actual process, watcher, sync and pending-write status |
 | companion/install | POST | Install/update first-party addon files with WoW closed |
-| settings | GET/PUT | Region service, policy, demo mode, theme and companion configuration |
+| settings | GET/PUT | Region service, policy, theme and companion configuration |
 
-Legacy recipe and inspection-export endpoints remain for v1 compatibility; the new UI does not use them for player workflow creation. `addon/plan` is the transport contract. Demo records are computed for presentation and never written into market, character or recipe tables. Health/job/file diagnostics remain real even while demo mode is enabled.
-
-## Dependencies and access seams
-
-FastAPI, SQLite WAL, React/TypeScript and Electron remain. One bounded async scanner runs at a time; concurrent feed downloads are configurable (1–6), with HTTP validators and retries. Electron bundles the Python backend, web assets, catalog and addon payload; program installation and user data remain separate.
-
-All local features are enabled. `DataAccessProvider` is an interface for a future authenticated external data provider; it is **not** a billing system or a secure client-side paywall. No premium addon switches or payment integration are enabled. Any future commercial plan requires review of Blizzard's addon/API policies and data licensing; charging for addon-related data is not assumed permissible merely because a server supplies it.
+Legacy recipe and inspection-export endpoints remain for v1 compatibility; the new UI does not use them for player workflow creation. `addon/plan` is the transport contract. Demo presentation has been removed. Missing inputs remain empty/unknown with diagnostics. Session state is saved in the addon and exported as a task record; elapsed play time is checkpointed and excludes offline gaps. Native auction-key scan results are session/realm bounded; a player acknowledgement covers the separate TSM review.

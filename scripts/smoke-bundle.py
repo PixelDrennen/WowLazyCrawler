@@ -38,7 +38,7 @@ with tempfile.TemporaryDirectory(prefix='lazycrawler-moved-') as temp:
             client.post('/api/login',json={'token':(data/'admin-token').read_text().strip()}).raise_for_status()
             config=client.get('/api/settings').json()
             admin=client.get('/api/admin').json()
-            assert admin['origin']=='demo' and len(admin['characters'])==4
+            assert admin['origin']=='live' and admin['characters']==[]
             assert len(admin['coverage'])>50
             plan=client.get('/api/addon/plan').json()
             assert plan['origin']=='live' and plan['opportunities']==[]

@@ -7,7 +7,12 @@ class Settings(BaseModel):
     region: Literal['us', 'eu', 'kr', 'tw'] = 'us'
     realms: list[str] = Field(default_factory=list, max_length=2000)
     selling_realms: list[str] = Field(default_factory=list, max_length=2000)
-    demo_mode: bool = True
+    demo_mode: bool = False
+    @field_validator("demo_mode", mode="before")
+    @classmethod
+    def live_only(cls, value):
+        return False  # Retain compatibility with older configs without displaying simulated observations.
+
     coverage_mode: Literal['all_clusters'] = 'all_clusters'
     wow_path: str = Field(default='', max_length=1000)
     companion_enabled: bool = True

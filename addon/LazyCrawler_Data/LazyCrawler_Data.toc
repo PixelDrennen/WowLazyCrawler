@@ -1,5 +1,5 @@
 ## Interface: 120100, 120105
 ## Title: LazyCrawler Data
 ## Notes: Offline-safe server market and planning data for LazyCrawler.
-## Version: 0.2.0
+## Version: 0.3.0
 Data.lua
