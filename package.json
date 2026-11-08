@@ -1,0 +1,78 @@
+{
+  "name": "wowlazycrawler",
+  "version": "0.1.0",
+  "description": "Self-hosted WoW auction and crafting intelligence",
+  "author": {
+    "name": "Drennen Dooms"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "build:web": "npm --prefix web run build",
+    "build:server": ".venv/bin/python -m PyInstaller --noconfirm --clean --onedir --name lazycrawler-server --distpath build/backend --workpath build/pyinstaller --add-data 'web/dist:web/dist' --collect-all uvicorn --collect-all server server_entry.py",
+    "desktop": "npm run build:web && electron .",
+    "package:linux": "npm run build:web && npm run build:server && electron-builder --linux rpm AppImage",
+    "package:dir": "npm run build:web && npm run build:server && electron-builder --linux dir"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "net.spectralfailure.wowlazycrawler",
+    "productName": "WoW LazyCrawler",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/backend/lazycrawler-server",
+        "to": "backend"
+      }
+    ],
+    "linux": {
+      "target": [
+        "rpm",
+        "AppImage"
+      ],
+      "category": "Utility",
+      "executableName": "wowlazycrawler",
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "wowlazycrawler",
+          "Keywords": "WoW;Auction;Crafting;"
+        }
+      },
+      "icon": "desktop/icons",
+      "syncDesktopName": true
+    },
+    "rpm": {
+      "depends": [
+        "gtk3",
+        "nss",
+        "alsa-lib",
+        "libXScrnSaver",
+        "libXdamage",
+        "libXrandr",
+        "mesa-libgbm",
+        "libdrm",
+        "libxkbcommon",
+        "at-spi2-atk",
+        "xdg-utils"
+      ],
+      "fpm": [
+        "--rpm-rpmbuild-define",
+        "_build_id_links none"
+      ]
+    },
+    "appImage": {
+      "artifactName": "WoW-LazyCrawler-${version}-${arch}.AppImage"
+    }
+  },
+  "desktopName": "wowlazycrawler.desktop"
+}

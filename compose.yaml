@@ -1,0 +1,12 @@
+services:
+  lazycrawler:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - lazycrawler-data:/data
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  lazycrawler-data:
